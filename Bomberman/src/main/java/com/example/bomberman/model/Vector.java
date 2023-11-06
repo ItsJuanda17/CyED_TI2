@@ -2,10 +2,10 @@ package com.example.bomberman.model;
 
 public class Vector {
 
-    private double posX;
-    private double posY;
+    private int posX;
+    private int posY;
 
-    public Vector(double posX, double posY) {
+    public Vector(int posX, int posY) {
         this.posX = posX;
         this.posY = posY;
     }
@@ -13,8 +13,8 @@ public class Vector {
     public void normalize(){
         double normal = Math.sqrt(Math.pow(posX, 2) + Math.pow(posY, 2));
         if(normal != 0){
-            posX /= normal;
-            posY /= normal;
+            posX /= (int) normal;
+            posY /= (int) normal;
         }
     }
 
@@ -23,19 +23,19 @@ public class Vector {
         posY *= speed;
     }
 
-    public double getPosX() {
+    public int getPosX() {
         return posX;
     }
 
-    public void setPosX(double posX) {
+    public void setPosX(int posX) {
         this.posX = posX;
     }
 
-    public double getPosY() {
+    public int getPosY() {
         return posY;
     }
 
-    public void setPosY(double posY) {
+    public void setPosY(int posY) {
         this.posY = posY;
     }
 }

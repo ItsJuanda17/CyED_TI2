@@ -9,5 +9,6 @@ public interface IGraph<K, V> {
     void bfs(K key);
     void dfs(K key);
     String print();
+    V[] getVertices();
 
 }

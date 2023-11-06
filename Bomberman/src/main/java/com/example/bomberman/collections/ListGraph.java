@@ -135,4 +135,15 @@ public class ListGraph<K, V> implements IGraph<K, V> {
         }
         return sb.toString();
     }
+
+    @Override
+    public V[] getVertices() {
+        V[] vertices = (V[]) new Object[adjacencyList.size()];
+        int i = 0;
+        for (K k : adjacencyList.keySet()) {
+            vertices[i] = adjacencyList.get(k).getValue();
+            i++;
+        }
+        return vertices;
+    }
 }

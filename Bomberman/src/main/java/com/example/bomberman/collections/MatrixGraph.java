@@ -167,6 +167,16 @@ public class MatrixGraph<K, V> implements IGraph<K, V> {
         return sb.toString();
     }
 
+    @Override
+    public V[] getVertices() {
+        V[] vertices = (V[]) new Object[vertexMap.size()];
+        int index = 0;
+        for (K k : vertexMap.keySet()) {
+            vertices[index++] = vertexMap.get(k).getValue();
+        }
+        return vertices;
+    }
+
     private int getVertexIndex(Vertex<K, V> vertex) {
         int index = 0;
         for (K k : vertexMap.keySet()) {
