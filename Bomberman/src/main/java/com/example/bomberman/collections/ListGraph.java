@@ -137,12 +137,11 @@ public class ListGraph<K, V> implements IGraph<K, V> {
     }
 
     @Override
-    public V[] getVertices() {
-        V[] vertices = (V[]) new Object[adjacencyList.size()];
+    public ArrayList<V> getVertices() {
+        ArrayList<V> vertices = new ArrayList<>();
         int i = 0;
         for (K k : adjacencyList.keySet()) {
-            vertices[i] = adjacencyList.get(k).getValue();
-            i++;
+            vertices.add(adjacencyList.get(k).getValue());
         }
         return vertices;
     }

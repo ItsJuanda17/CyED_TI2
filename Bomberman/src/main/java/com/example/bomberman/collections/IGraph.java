@@ -1,5 +1,7 @@
 package com.example.bomberman.collections;
 
+import java.util.ArrayList;
+
 public interface IGraph<K, V> {
     boolean addVertex(K key, V value);
     boolean removeVertex(K key);
@@ -9,6 +11,6 @@ public interface IGraph<K, V> {
     void bfs(K key);
     void dfs(K key);
     String print();
-    V[] getVertices();
+    ArrayList<V> getVertices();
 
 }
