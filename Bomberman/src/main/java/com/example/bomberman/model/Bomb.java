@@ -6,6 +6,7 @@ import javafx.scene.image.Image;
 import java.util.ArrayList;
 
 public class Bomb extends GameEntity{
+    private static final int MAX_RANGE = 5;
 
     private int range;
     private int timer;
@@ -40,8 +41,15 @@ public class Bomb extends GameEntity{
         this.timer--;
     }
 
-    public void incrementRange() {
-        this.range++;
+
+    public boolean incrementRange() {
+        if(this.range < MAX_RANGE) {
+            this.range++;
+            return true;
+        }else {
+            return false;
+        }
+
     }
 
     public void decrementRange() {
@@ -71,6 +79,9 @@ public class Bomb extends GameEntity{
     }
 
     @Override
+
     public void paint(){
+
     }
 }
+
