@@ -35,6 +35,7 @@ public class GameController implements Initializable {
     public void initialize(URL url, ResourceBundle resourceBundle) {
         this.gc = canvas.getGraphicsContext2D();
         this.currentMap = new Map(this.canvas, 45, 13);
+        initActions();
         /*
         this.randomMapGenerator = new RandomMapGenerator(45,13);
         Tile[][] grid = randomMapGenerator.getGrid();
@@ -51,6 +52,29 @@ public class GameController implements Initializable {
         canvas.widthProperty().addListener((observable, oldValue, newValue) -> repaintMaze());
         canvas.heightProperty().addListener((observable, oldValue, newValue) -> repaintMaze());
         repaintMaze();
+
+        new Thread(() -> {
+            while (true) {
+                Platform.runLater(() -> {
+                    currentMap.paint();
+                });
+                try {
+                    Thread.sleep(75);
+                } catch (InterruptedException e) {
+                    e.printStackTrace();
+                }
+            }
+        }).start();
+    }
+
+    public void initActions(){
+        canvas.setOnKeyReleased(event ->{
+            currentMap.setOnKeyReleased(event);
+        });
+
+        canvas.setOnKeyPressed(event ->{
+            currentMap.setOnKeyPressed(event);
+        });
     }
 
     private void repaintMaze() {

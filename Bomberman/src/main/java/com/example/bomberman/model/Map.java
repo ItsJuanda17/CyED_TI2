@@ -4,7 +4,10 @@ import com.example.bomberman.collections.IGraph;
 import com.example.bomberman.collections.ListGraph;
 import javafx.scene.canvas.Canvas;
 import javafx.scene.canvas.GraphicsContext;
+import javafx.scene.input.KeyEvent;
 import javafx.scene.paint.Color;
+
+import java.util.ArrayList;
 
 public class Map {
 
@@ -16,7 +19,8 @@ public class Map {
     private Tile exitPoint;
     private RandomMapGenerator randomMapGenerator;
     private IGraph<Vector, Tile> map;
-
+    private Player player;
+    private ArrayList<Enemy> enemies;
 
     public Map(Canvas canvas, int width, int height) {
         this.canvas = canvas;
@@ -25,6 +29,9 @@ public class Map {
         this.height = height;
         this.map = new ListGraph<>();
         this.randomMapGenerator = new RandomMapGenerator(width, height);
+        this.enemies = new ArrayList<>();
+        enemies.add(new Enemy(canvas, this));
+        this.player = new Player(canvas, this);
         createMap();
     }
 
@@ -66,7 +73,39 @@ public class Map {
         }
     }
 
+    public boolean collidesWithWalls(Player player) {
+
+        int playerX = player.getPosition().getPosX();
+        int playerY = player.getPosition().getPosY();
+        int playerSize = 10;
+
+
+        for (Tile tile : map.getVertices()) {
+            if (tile.getState() == TileState.BLOCKED) {
+                int wallX = tile.getX() * 10;
+                int wallY = tile.getY() * 10;
+
+                if (playerX < wallX + 10 &&
+                        playerX + playerSize > wallX &&
+                        playerY < wallY + 10 &&
+                        playerY + playerSize > wallY) {
+                    return true;
+                }
+            }
+        }
+
+        return false;
+    }
+
     public void paint(){
+        paintMap();
+        player.paint();
+        for(Enemy enemy : enemies){
+            enemy.paint();
+        }
+    }
+
+    private void paintMap(){
         gc.setFill(Color.GREEN);
         gc.fillRect(0, 0, canvas.getWidth(), canvas.getHeight());
         spawnPoint.getGc().setFill(Color.BLUE);
@@ -77,5 +116,13 @@ public class Map {
             if(!tile.equals(spawnPoint) && !tile.equals(exitPoint))
                 tile.paint(this.canvas);
         }
+    }
+
+    public void setOnKeyPressed(KeyEvent event){
+        player.setOnKeyPressed(event);
+    }
+
+    public void setOnKeyReleased(KeyEvent event){
+        player.setOnKeyReleased(event);
     }
 }
