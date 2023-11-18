@@ -38,4 +38,18 @@ public class Vector {
     public void setPosY(int posY) {
         this.posY = posY;
     }
+
+    @Override
+    public boolean equals(Object obj) {
+        if (obj instanceof Vector) {
+            Vector vector = (Vector) obj;
+            return this.posX == vector.posX && this.posY == vector.posY;
+        }
+        return false;
+    }
+
+    @Override
+    public String toString() {
+        return "(" + posX + ", " + posY + ")";
+    }
 }
