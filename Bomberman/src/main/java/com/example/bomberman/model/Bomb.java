@@ -29,8 +29,8 @@ public class Bomb extends GameEntity {
     }
 
     private void initializeBomb() {
-        this.width = 50;
-        this.height = 50;
+        this.width = 25;
+        this.height = 25;
         this.timer = 3;
         this.fireRange = 1;
         this.exploded = false;

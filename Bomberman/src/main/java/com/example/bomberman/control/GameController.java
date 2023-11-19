@@ -12,10 +12,18 @@ import javafx.scene.paint.Color;
 import javafx.scene.text.Font;
 import javafx.scene.text.FontWeight;
 
+import java.io.ByteArrayInputStream;
+import java.io.ByteArrayOutputStream;
+import java.io.InputStream;
 import java.net.URL;
+import java.util.ResourceBundle;
 import java.util.ArrayList;
 import java.util.Objects;
-import java.util.ResourceBundle;
+
+import javax.sound.sampled.AudioInputStream;
+import javax.sound.sampled.AudioSystem;
+import javax.sound.sampled.Clip;
+
 
 public class GameController implements Initializable {
 
@@ -36,6 +44,8 @@ public class GameController implements Initializable {
     private AnchorPane root;
 
     private Map currentMap;
+    private Clip bombClip;
+
 
     @Override
     public void initialize(URL url, ResourceBundle resourceBundle) {
@@ -43,6 +53,39 @@ public class GameController implements Initializable {
         this.statsGc = statsCanvas.getGraphicsContext2D();
 
         this.currentMap = new Map(this.gameCanvas);
+
+        try {
+            String soundPath = "/Sounds/soundtrack/01_Bomberman-Hero-Foehn.wav";
+            InputStream inputStream = getClass().getResourceAsStream(soundPath);
+
+            if (inputStream != null) {
+                // Almacenar el contenido en un búfer
+                ByteArrayOutputStream buffer = new ByteArrayOutputStream();
+                int nRead;
+                byte[] data = new byte[1024];
+                while ((nRead = inputStream.read(data, 0, data.length)) != -1) {
+                    buffer.write(data, 0, nRead);
+                }
+                buffer.flush();
+
+
+                ByteArrayInputStream byteArrayInputStream = new ByteArrayInputStream(buffer.toByteArray());
+                AudioInputStream audioInputStream = AudioSystem.getAudioInputStream(byteArrayInputStream);
+
+
+                if (audioInputStream.markSupported()) {
+                    audioInputStream.reset();
+                }
+
+                bombClip = AudioSystem.getClip();
+                bombClip.open(audioInputStream);
+                bombClip.start();
+            } else {
+                System.err.println("No se pudo encontrar el recurso: " + soundPath);
+            }
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
 
         initActions();
 
@@ -63,6 +106,7 @@ public class GameController implements Initializable {
     public void initActions(){
         gameCanvas.setOnKeyReleased(event ->{
             currentMap.setOnKeyReleased(event);
+
         });
 
         gameCanvas.setOnKeyPressed(event ->{
@@ -74,6 +118,8 @@ public class GameController implements Initializable {
         paintStatsPanel();
         currentMap.paint();
     }
+
+
 
     private void paintStatsPanel(){
         int iconSize = 50;
