@@ -5,57 +5,26 @@ import javafx.scene.canvas.Canvas;
 import javafx.scene.canvas.GraphicsContext;
 import javafx.scene.paint.Color;
 
-public class Tile {
+public class Tile extends GameEntity{
 
-    private static final int TILE_SIZE = 10;
-    Canvas canvas;
-    GraphicsContext gc;
-    private Vector position;
+    public static final int TILE_WIDTH = 25;
+    public static final int TILE_HEIGHT = 25;
     private GameEntity content;
     private TileState state;
 
-    public Tile(int x, int y) {
+    public Tile(Canvas canvas, int x, int y) {
+        super(canvas);
         this.position = new Vector(x, y);
-    }
-
-    public Tile(Vector position) {
-        this.position = position;
-    }
-
-    public Canvas getCanvas() {
-        return canvas;
-    }
-
-    public void setCanvas(Canvas canvas) {
         this.canvas = canvas;
-    }
-
-    public GraphicsContext getGc() {
-        return gc;
-    }
-
-    public void setGc(GraphicsContext gc) {
-        this.gc = gc;
-    }
-
-    public Vector getPosition() {
-        return this.position;
-    }
-
-    public int getX() {
-        return this.position.getPosX();
-    }
-
-    public int getY() {
-        return this.position.getPosY();
-    }
-
-    public void setPosition(Vector position) {
-        this.position = position;
+        this.gc = canvas.getGraphicsContext2D();
     }
 
     public GameEntity getContent() {
         return this.content;
+    }
+
+    public void setContent(GameEntity content) {
+        this.content = content;
     }
 
     public TileState getState() {
@@ -64,17 +33,22 @@ public class Tile {
 
     public void setState(TileState state) {
         this.state = state;
+        this.content = state == TileState.PASSAGE ? null : state == TileState.BREAKABLE_WALL ? new DestructibleWall(canvas, position.getPosX(), position.getPosY()) : new Wall(canvas, position.getPosX(), position.getPosY());
     }
 
-    public void setContent(GameEntity content) {
-        this.content = content;
-    }
+    @Override
+    public void paint(){
 
-    public void paint(Canvas canvas){
-        this.canvas = canvas;
-        gc = canvas.getGraphicsContext2D();
-        gc.setFill(state == TileState.PASSAGE ? Color.WHITE : state == TileState.BREAKABLE_WALL ? Color.GRAY : Color.BLACK);
-        gc.fillRect(position.getPosX() * TILE_SIZE, position.getPosY() * TILE_SIZE, TILE_SIZE, TILE_SIZE);
+        if(content != null) {
+            content.paint();
+        }else {
+            gc.setFill(Color.GREEN);
+            gc.fillRect(position.getPosX() * TILE_WIDTH, position.getPosY() * TILE_HEIGHT, TILE_WIDTH, TILE_HEIGHT);
+        }
+        /*
+        gc.setFill(state == TileState.PASSAGE ? Color.GREEN : state == TileState.BREAKABLE_WALL ? Color.GRAY : Color.BLACK);
+        gc.fillRect(position.getPosX() * TILE_WIDTH, position.getPosY() * TILE_HEIGHT, TILE_WIDTH, TILE_HEIGHT);
+         */
     }
 
     @Override

@@ -3,9 +3,9 @@
 <?import javafx.scene.canvas.*?>
 <?import javafx.scene.layout.*?>
 
-<AnchorPane fx:id="root" maxHeight="-Infinity" maxWidth="-Infinity" minHeight="-Infinity" minWidth="-Infinity" prefHeight="500.0" prefWidth="537.0" xmlns="http://javafx.com/javafx/17.0.2-ea" xmlns:fx="http://javafx.com/fxml/1" fx:controller="com.example.bomberman.control.GameController">
+<AnchorPane fx:id="root" minHeight="600.0" minWidth="1200.0" prefHeight="500.0" prefWidth="537.0" xmlns="http://javafx.com/javafx/17.0.2-ea" xmlns:fx="http://javafx.com/fxml/1" fx:controller="com.example.bomberman.control.GameController">
     <children>
-        <Canvas fx:id="canvas" focusTraversable="true" AnchorPane.topAnchor="0.0" AnchorPane.rightAnchor="0.0" AnchorPane.bottomAnchor="0.0" AnchorPane.leftAnchor="0.0" />
+        <Canvas fx:id="gameCanvas" focusTraversable="true" height="500.0" layoutY="100.0" width="1200.0" />
+      <Canvas fx:id="statsCanvas" height="100.0" width="1200.0" />
     </children>
 </AnchorPane>
-

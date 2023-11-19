@@ -35,6 +35,7 @@ public abstract class Character extends GameEntity{
         this.runLeft = new ArrayList<>();
         this.runRight = new ArrayList<>();
         this.death = new ArrayList<>();
+        this.map = map;
     }
 
     public int getSpeed() {

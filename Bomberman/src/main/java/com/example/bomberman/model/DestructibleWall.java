@@ -1,40 +1,22 @@
 package com.example.bomberman.model;
 
 import javafx.scene.canvas.Canvas;
+import javafx.scene.image.Image;
 
-import javafx.scene.paint.Color;
+import java.util.Objects;
 
-public class DestructibleWall extends GameEntity {
+public class DestructibleWall extends Wall {
 
-    private boolean destroyed;
     private TileState state;
 
-    public DestructibleWall(Canvas canvas) {
-        super(canvas);
-        this.destroyed = false;
+    public DestructibleWall(Canvas canvas, int x, int y) {
+        super(canvas, x, y);
         this.state = TileState.BREAKABLE_WALL;
-
     }
 
-    public boolean isDestroyed() {
-        return destroyed;
-    }
-
-    public void destroy() {
-        this.destroyed = true;
-    }
-
-
-  
-//paint beta
-  
     @Override
-    public void paint() {
-        gc.setFill(getFillColor());
-        gc.fillRect(position.getPosX() * 10, position.getPosY() * 10, 10, 10);
+    public void placeImage() {
+        idle = new Image(Objects.requireNonNull(getClass().getResourceAsStream("/images/walls/destructibleWall-idle-00.png")), Tile.TILE_WIDTH, Tile.TILE_HEIGHT, false, false);
     }
 
-    private Color getFillColor() {
-        return state == TileState.BREAKABLE_WALL ? Color.GRAY : Color.BLACK;
-    }
 }

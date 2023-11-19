@@ -13,12 +13,12 @@ public class RandomMapGenerator {
     private Tile endTile;
     private Random random;
 
-    public RandomMapGenerator(int width, int height) {
+    public RandomMapGenerator(Canvas canvas, int width, int height) {
         this.width = width;
         this.height = height;
         this.grid = new Tile[width][height];
         this.random = new Random();
-        generateMap();
+        generateMap(canvas);
         generateBreakableWalls();
         surroundByWalls();
     }
@@ -64,11 +64,11 @@ public class RandomMapGenerator {
         }
     }
 
-    private void generateMap() {
+    private void generateMap(Canvas canvas) {
         // Start with a grid full of walls.
         for(int i = 0; i < width; i++){
             for(int j = 0; j < height ; j++){
-                grid[i][j] = new Tile(i, j);
+                grid[i][j] = new Tile(canvas,i, j);
                 grid[i][j].setState(TileState.BLOCKED);
             }
         }

@@ -3,52 +3,65 @@ package com.example.bomberman.model;
 import com.example.bomberman.collections.IGraph;
 import com.example.bomberman.collections.ListGraph;
 
+import com.example.bomberman.control.GameController;
 import javafx.scene.canvas.Canvas;
 import javafx.scene.canvas.GraphicsContext;
+import javafx.scene.image.Image;
 import javafx.scene.input.KeyEvent;
 import javafx.scene.paint.Color;
 
 import java.util.ArrayList;
+import java.util.Objects;
 
 public class Map {
 
+    public final static int WIDTH = (int) (GameController.GAME_WIDTH / Tile.TILE_WIDTH);
+    public final static int HEIGHT = (int) (GameController.GAME_HEIGHT / Tile.TILE_HEIGHT);
     private Canvas canvas;
     private GraphicsContext gc;
-    private int width;
-    private int height;
     private Tile spawnPoint;
     private Tile exitPoint;
+    private Image exitImage;
     private RandomMapGenerator randomMapGenerator;
     private IGraph<Vector, Tile> map;
     private Player player;
     private Bomb bomb;
     private ArrayList<Enemy> enemies;
 
-    public Map(Canvas canvas, int width, int height) {
+    public Map(Canvas canvas) {
         this.canvas = canvas;
         this.gc = canvas.getGraphicsContext2D();
-        this.width = width;
-        this.height = height;
         this.map = new ListGraph<>();
-        this.randomMapGenerator = new RandomMapGenerator(width, height);
+        this.randomMapGenerator = new RandomMapGenerator(canvas, WIDTH, HEIGHT);
         this.enemies = new ArrayList<>();
         enemies.add(new Enemy(canvas, this));
+        createMap();
         this.player = new Player(canvas, this);
         this.bomb = new Bomb(canvas);
-        createMap();
+        this.exitImage = new Image(Objects.requireNonNull(getClass().getResourceAsStream("/images/walls/exit-00.png")), Tile.TILE_WIDTH, Tile.TILE_HEIGHT, false, false);
+
     }
 
     public IGraph<Vector, Tile> getMap() {
         return map;
     }
 
+    public Player getPlayer() {
+        return player;
+    }
+
+    public ArrayList<Enemy> getEnemies() {
+        return enemies;
+    }
+
     private void createMap() {
         Tile[][] grid = randomMapGenerator.getGrid();
-        spawnPoint = randomMapGenerator.getStartTile();
-        exitPoint = randomMapGenerator.getExitTile();
 
-        for (int x = 0; x < width; x++) {
-            for (int y = 0; y < height; y++) {
+        this.spawnPoint = randomMapGenerator.getStartTile();
+        this.exitPoint = randomMapGenerator.getExitTile();
+
+        for (int x = 0; x < WIDTH; x++) {
+            for (int y = 0; y < HEIGHT; y++) {
                 Tile currentTile = grid[x][y];
 
                 // Add the current tile as a vertex in the graph
@@ -58,21 +71,16 @@ public class Map {
                 if (x > 0 && grid[x - 1][y].getState() == TileState.PASSAGE) {
                     map.addEdge(new Vector(x, y), new Vector(x - 1, y), 1);
                 }
-                if (x < width - 1 && grid[x + 1][y].getState() == TileState.PASSAGE) {
+                if (x < WIDTH - 1 && grid[x + 1][y].getState() == TileState.PASSAGE) {
                     map.addEdge(new Vector(x, y), new Vector(x + 1, y), 1);
                 }
                 if (y > 0 && grid[x][y - 1].getState() == TileState.PASSAGE) {
                     map.addEdge(new Vector(x, y), new Vector(x, y - 1), 1);
                 }
-                if (y < height - 1 && grid[x][y + 1].getState() == TileState.PASSAGE) {
+                if (y < HEIGHT - 1 && grid[x][y + 1].getState() == TileState.PASSAGE) {
                     map.addEdge(new Vector(x, y), new Vector(x, y + 1), 1);
                 }
             }
-        }
-
-        for(Tile tile : map.getVertices()){
-            tile.setCanvas(canvas);
-            tile.setGc(gc);
         }
     }
 
@@ -100,6 +108,10 @@ public class Map {
         return false;
     }
 
+    public Tile getSpawnPoint() {
+        return spawnPoint;
+    }
+
     public void paint(){
         paintMap();
         player.paint();
@@ -110,16 +122,15 @@ public class Map {
     }
 
     private void paintMap(){
-        gc.setFill(Color.GREEN);
         gc.fillRect(0, 0, canvas.getWidth(), canvas.getHeight());
-        spawnPoint.getGc().setFill(Color.BLUE);
-        spawnPoint.getGc().fillRect(spawnPoint.getX() * 10, spawnPoint.getY() * 10, 10, 10);
-        exitPoint.getGc().setFill(Color.RED);
-        exitPoint.getGc().fillRect(spawnPoint.getX() * 10, spawnPoint.getY() * 10, 10, 10);
         for(Tile tile : map.getVertices()){
             if(!tile.equals(spawnPoint) && !tile.equals(exitPoint))
-                tile.paint(this.canvas);
+                tile.paint();
         }
+        spawnPoint.getGc().setFill(Color.BLUE);
+        spawnPoint.getGc().fillRect(spawnPoint.getX() * Tile.TILE_WIDTH, spawnPoint.getY() * Tile.TILE_HEIGHT, Tile.TILE_WIDTH, Tile.TILE_HEIGHT);
+        exitPoint.getGc().setFill(Color.RED);
+        exitPoint.getGc().drawImage(exitImage, exitPoint.getX() * Tile.TILE_WIDTH, exitPoint.getY() * Tile.TILE_HEIGHT);
     }
 
     public void setOnKeyPressed(KeyEvent event){

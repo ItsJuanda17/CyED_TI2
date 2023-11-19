@@ -9,6 +9,8 @@ import java.util.Objects;
 
 public class Player extends Character implements IExploitable {
 
+    private static final int WIDTH = Tile.TILE_WIDTH-5;
+    private static final int HEIGHT = Tile.TILE_HEIGHT-5;
     private ArrayList<Bomb> bombs;
     private boolean upPressed;
     private boolean downPressed;
@@ -23,34 +25,38 @@ public class Player extends Character implements IExploitable {
 
     private void initPlayer(){
         this.bombs = new ArrayList<>();
-        this.width = 32;
-        this.height = 32;
+        this.width = WIDTH;
+        this.height = HEIGHT;
         this.speed = 1;
         this.lives = 3;
         this.state = CharacterState.IDLE;
         this.lastDirection = CharacterState.RUN_DOWN;
         this.frame = 0;
-        this.position = new Vector(0, 0);
+        this.position = new Vector(map.getSpawnPoint().getX()*Tile.TILE_WIDTH, map.getSpawnPoint().getY()*Tile.TILE_HEIGHT);
 
         for(int i = 0; i < 4; i++) {
-            this.idle.add(new Image(Objects.requireNonNull(getClass().getResourceAsStream("/images/bomberman/idle/bomberman-idle-0"+i+".png"))));
+            this.idle.add(new Image(Objects.requireNonNull(getClass().getResourceAsStream("/images/bomberman/idle/bomberman-idle-0"+i+".png")), WIDTH, HEIGHT, false, false));
         }
 
         for(int i = 0; i < 4; i++) {
-            this.runUp.add(new Image(Objects.requireNonNull(getClass().getResourceAsStream("/images/bomberman/run/bomberman-run-up-0" + i + ".png"))));
+            this.runUp.add(new Image(Objects.requireNonNull(getClass().getResourceAsStream("/images/bomberman/run/bomberman-run-up-0" + i + ".png")), WIDTH, HEIGHT, false, false));
         }
 
         for(int i = 0; i < 4; i++) {
-            this.runDown.add(new Image(Objects.requireNonNull(getClass().getResourceAsStream("/images/bomberman/run/bomberman-run-down-0" + i + ".png"))));
+            this.runDown.add(new Image(Objects.requireNonNull(getClass().getResourceAsStream("/images/bomberman/run/bomberman-run-down-0" + i + ".png")), WIDTH, HEIGHT, false, false));
         }
 
         for(int i = 0; i < 4; i++) {
-            this.runLeft.add(new Image(Objects.requireNonNull(getClass().getResourceAsStream("/images/bomberman/run/bomberman-run-left-0" + i + ".png"))));
+            this.runLeft.add(new Image(Objects.requireNonNull(getClass().getResourceAsStream("/images/bomberman/run/bomberman-run-left-0" + i + ".png")), WIDTH, HEIGHT, false, false));
         }
 
         for(int i = 0; i < 4; i++) {
-            this.runRight.add(new Image(Objects.requireNonNull(getClass().getResourceAsStream("/images/bomberman/run/bomberman-run-right-0" + i + ".png"))));
+            this.runRight.add(new Image(Objects.requireNonNull(getClass().getResourceAsStream("/images/bomberman/run/bomberman-run-right-0" + i + ".png")), WIDTH, HEIGHT, false, false));
         }
+    }
+
+    public ArrayList<Bomb> getBombs() {
+        return bombs;
     }
 
     @Override
@@ -115,14 +121,12 @@ public class Player extends Character implements IExploitable {
     }
 
     public void incrementBombCount() {
-
         Bomb newBomb = new Bomb(this.canvas);
         newBomb.dropBomb(this.position, 3, 1);
         this.bombs.add(newBomb);
     }
 
     public void incrementBombRange() {
-
         int newRange = 2;
         this.bombs.forEach(bomb -> bomb.updateFireRange(newRange));
     }

@@ -16,6 +16,14 @@ public abstract class GameEntity {
         this.gc = canvas.getGraphicsContext2D();
     }
 
+    public Canvas getCanvas() {
+        return canvas;
+    }
+
+    public GraphicsContext getGc() {
+        return gc;
+    }
+
     public int getWidth() {
         return width;
     }
@@ -26,6 +34,14 @@ public abstract class GameEntity {
 
     public Vector getPosition() {
         return position;
+    }
+
+    public int getX() {
+        return position.getPosX();
+    }
+
+    public int getY() {
+        return position.getPosY();
     }
 
     public void setPosition(Vector position) {
