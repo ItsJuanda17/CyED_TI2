@@ -57,7 +57,7 @@ public class ListGraph<K, V> implements IGraph<K, V> {
         return false;
     }
 
-    public void bfs(K key){
+    public Queue<Vertex<K, V>> bfs(K key){
         for(K k: adjacencyList.keySet()){
             Vertex<K, V> u = adjacencyList.get(k);
             u.setColor(Color.WHITE);
@@ -71,22 +71,26 @@ public class ListGraph<K, V> implements IGraph<K, V> {
         s.setPredecessor(null);
 
         Queue<Vertex<K, V>> queue = new LinkedList<>();
+        Queue<Vertex<K, V>> path = new LinkedList<>();
         queue.offer(s);
+        path.offer(s);
 
         while (!queue.isEmpty()) {
             Vertex<K, V> u = queue.poll();
             for (Edge<K, V> edge : u.getEdges()) {
                 Vertex<K, V> v = edge.getDestination();
+                path.offer(u);
                 if (v.getColor() == Color.WHITE) {
                     v.setColor(Color.GRAY);
                     v.setDistance(u.getDistance() + 1);
                     v.setPredecessor(u);
                     queue.offer(v);
+                    path.offer(v);
                 }
             }
             u.setColor(Color.BLACK);
         }
-
+        return path;
     }
 
     public void dfs(K key){
@@ -144,5 +148,10 @@ public class ListGraph<K, V> implements IGraph<K, V> {
             vertices.add(adjacencyList.get(k).getValue());
         }
         return vertices;
+    }
+
+    @Override
+    public Vertex<K, V> getVertex(K key) {
+        return adjacencyList.get(key);
     }
 }

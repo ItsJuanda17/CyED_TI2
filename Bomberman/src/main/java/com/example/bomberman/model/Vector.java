@@ -1,6 +1,8 @@
 package com.example.bomberman.model;
 
-public class Vector {
+import java.util.Objects;
+
+public class Vector implements Comparable<Vector>{
 
     private int posX;
     private int posY;
@@ -41,15 +43,31 @@ public class Vector {
 
     @Override
     public boolean equals(Object obj) {
-        if (obj instanceof Vector) {
-            Vector vector = (Vector) obj;
-            return this.posX == vector.posX && this.posY == vector.posY;
-        }
-        return false;
+        if (this == obj) return true;
+        if (obj == null || getClass() != obj.getClass()) return false;
+
+        Vector vector = (Vector) obj;
+        return this.posX == vector.posX && this.posY == vector.posY;
+    }
+
+    @Override
+    public int hashCode() {
+        return Objects.hash(posX, posY);
     }
 
     @Override
     public String toString() {
         return "(" + posX + ", " + posY + ")";
+    }
+
+    @Override
+    public int compareTo(Vector vector) {
+        if(this.posX == vector.posX && this.posY == vector.posY){
+            return 0;
+        }else if(this.posX < vector.posX || this.posY < vector.posY){
+            return -1;
+        }else{
+            return 1;
+        }
     }
 }

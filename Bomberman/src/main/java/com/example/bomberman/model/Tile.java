@@ -53,10 +53,21 @@ public class Tile extends GameEntity{
 
     @Override
     public boolean equals(Object obj) {
+        if (this == obj) return true;
         if (obj instanceof Tile) {
             Tile tile = (Tile) obj;
             return this.position.equals(tile.getPosition());
         }
         return false;
     }
+
+    @Override
+    public String toString() {
+        return "Tile{" +
+                "position=" + position +
+                ", content=" + content +
+                ", state=" + state +
+                '}';
+    }
+
 }

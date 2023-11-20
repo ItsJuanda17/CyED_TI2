@@ -9,8 +9,6 @@ import java.util.Objects;
 
 public class Player extends Character implements IExploitable {
 
-    private static final int WIDTH = Tile.TILE_WIDTH-5;
-    private static final int HEIGHT = Tile.TILE_HEIGHT-5;
     private ArrayList<Bomb> bombs;
     private boolean upPressed;
     private boolean downPressed;
@@ -32,7 +30,7 @@ public class Player extends Character implements IExploitable {
         this.state = CharacterState.IDLE;
         this.lastDirection = CharacterState.RUN_DOWN;
         this.frame = 0;
-        this.position = new Vector(map.getSpawnPoint().getX()*Tile.TILE_WIDTH, map.getSpawnPoint().getY()*Tile.TILE_HEIGHT);
+        this.position = new Vector(map.getSpawnPoint().getX(), map.getSpawnPoint().getY());
 
         for(int i = 0; i < 4; i++) {
             this.idle.add(new Image(Objects.requireNonNull(getClass().getResourceAsStream("/images/bomberman/idle/bomberman-idle-0"+i+".png")), WIDTH, HEIGHT, false, false));
@@ -61,7 +59,7 @@ public class Player extends Character implements IExploitable {
 
     @Override
     public void move() {
-        int moveAmount = 10;
+        int moveAmount = 1;
         Vector originalPosition = new Vector(position.getPosX(), position.getPosY());
 
         if (upPressed) {
@@ -95,26 +93,26 @@ public class Player extends Character implements IExploitable {
         switch (state) {
             case IDLE -> {
                 switch (lastDirection) {
-                    case RUN_UP -> gc.drawImage(idle.get(0), position.getPosX(), position.getPosY());
-                    case RUN_DOWN -> gc.drawImage(idle.get(1), position.getPosX(), position.getPosY());
-                    case RUN_LEFT -> gc.drawImage(idle.get(2), position.getPosX(), position.getPosY());
-                    case RUN_RIGHT -> gc.drawImage(idle.get(3), position.getPosX(), position.getPosY());
+                    case RUN_UP -> gc.drawImage(idle.get(0), position.getPosX()*Tile.TILE_WIDTH, position.getPosY()*Tile.TILE_HEIGHT);
+                    case RUN_DOWN -> gc.drawImage(idle.get(1), position.getPosX()*Tile.TILE_WIDTH, position.getPosY()*Tile.TILE_HEIGHT);
+                    case RUN_LEFT -> gc.drawImage(idle.get(2), position.getPosX()*Tile.TILE_WIDTH, position.getPosY()*Tile.TILE_HEIGHT);
+                    case RUN_RIGHT -> gc.drawImage(idle.get(3), position.getPosX()*Tile.TILE_WIDTH, position.getPosY()*Tile.TILE_HEIGHT);
                 }
             }
             case RUN_UP -> {
-                gc.drawImage(runUp.get(frame), position.getPosX(), position.getPosY());
+                gc.drawImage(runUp.get(frame), position.getPosX()*Tile.TILE_WIDTH, position.getPosY()*Tile.TILE_HEIGHT);
                 frame = (frame + 1) % runUp.size();
             }
             case RUN_DOWN -> {
-                gc.drawImage(runDown.get(frame), position.getPosX(), position.getPosY());
+                gc.drawImage(runDown.get(frame), position.getPosX()*Tile.TILE_WIDTH, position.getPosY()*Tile.TILE_HEIGHT);
                 frame = (frame + 1) % runDown.size();
             }
             case RUN_LEFT -> {
-                gc.drawImage(runLeft.get(frame), position.getPosX(), position.getPosY());
+                gc.drawImage(runLeft.get(frame), position.getPosX()*Tile.TILE_WIDTH, position.getPosY()*Tile.TILE_HEIGHT);
                 frame = (frame + 1) % runLeft.size();
             }
             case RUN_RIGHT -> {
-                gc.drawImage(runRight.get(frame), position.getPosX(), position.getPosY());
+                gc.drawImage(runRight.get(frame), position.getPosX()*Tile.TILE_WIDTH, position.getPosY()*Tile.TILE_HEIGHT);
                 frame = (frame + 1) % runRight.size();
             }
         }

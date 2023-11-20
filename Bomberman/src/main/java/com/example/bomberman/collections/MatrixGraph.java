@@ -91,35 +91,37 @@ public class MatrixGraph<K, V> implements IGraph<K, V> {
     }
 
     @Override
-    public void bfs(K key) {
+    public Queue<Vertex<K, V>> bfs(K key) {
 
         for (Vertex<K, V> vertex : vertexMap.values()) {
             vertex.setColor(Color.WHITE);
         }
 
         Vertex<K, V> startVertex = vertexMap.get(key);
-        if (startVertex == null) {
-            return;
-        }
 
         Queue<Vertex<K, V>> queue = new LinkedList<>();
+        Queue<Vertex<K, V>> path = new LinkedList<>();
         startVertex.setColor(Color.GRAY);
         queue.offer(startVertex);
+        path.offer(startVertex);
 
         while (!queue.isEmpty()) {
             Vertex<K, V> currentVertex = queue.poll();
-            System.out.print(currentVertex + " ");
+            path.offer(currentVertex);
 
             for (Edge<K, V> edge : currentVertex.getEdges()) {
                 Vertex<K, V> neighbor = edge.getDestination();
                 if (neighbor.getColor() == Color.WHITE) {
                     neighbor.setColor(Color.GRAY);
                     queue.offer(neighbor);
+                    path.offer(neighbor);
                 }
             }
 
             currentVertex.setColor(Color.BLACK);
         }
+
+        return path;
     }
 
     @Override
@@ -174,6 +176,11 @@ public class MatrixGraph<K, V> implements IGraph<K, V> {
             vertices.add(vertex.getValue());
         }
         return vertices;
+    }
+
+    @Override
+    public Vertex<K, V> getVertex(K key) {
+        return null;
     }
 
     private int getVertexIndex(Vertex<K, V> vertex) {

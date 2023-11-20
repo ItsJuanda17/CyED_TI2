@@ -11,7 +11,9 @@ import javafx.scene.input.KeyEvent;
 import javafx.scene.paint.Color;
 
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.Objects;
+import java.util.Random;
 
 public class Map {
 
@@ -33,13 +35,30 @@ public class Map {
         this.gc = canvas.getGraphicsContext2D();
         this.map = new ListGraph<>();
         this.randomMapGenerator = new RandomMapGenerator(canvas, WIDTH, HEIGHT);
-        this.enemies = new ArrayList<>();
-        enemies.add(new Enemy(canvas, this));
         createMap();
+
+        this.enemies = new ArrayList<>();
+        Random random = new Random();
+        int enemyCount = random.nextInt(3) + 5;
+        for(int i = 0; i < enemyCount; i++){
+            Enemy enemy = new Enemy(canvas, this, getRandomPosition());
+            enemies.add(enemy);
+        }
+
         this.player = new Player(canvas, this);
         this.bomb = new Bomb(canvas);
         this.exitImage = new Image(Objects.requireNonNull(getClass().getResourceAsStream("/images/walls/exit-00.png")), Tile.TILE_WIDTH, Tile.TILE_HEIGHT, false, false);
+    }
 
+    public Vector getRandomPosition() {
+        Random random = new Random(); int x; int y; Vector position;
+        do {
+            x = random.nextInt(WIDTH);
+            y = random.nextInt(HEIGHT);
+            position = new Vector(x, y);
+        } while (map.getVertex(position).getValue().getState() != TileState.PASSAGE || position.equals(spawnPoint.getPosition()));
+
+        return position;
     }
 
     public IGraph<Vector, Tile> getMap() {
@@ -60,25 +79,33 @@ public class Map {
         this.spawnPoint = randomMapGenerator.getStartTile();
         this.exitPoint = randomMapGenerator.getExitTile();
 
+        System.out.println("Spawn point: " + spawnPoint.getPosition());
+        System.out.println(WIDTH+ " " + HEIGHT);
+
         for (int x = 0; x < WIDTH; x++) {
             for (int y = 0; y < HEIGHT; y++) {
                 Tile currentTile = grid[x][y];
+                Vector position = new Vector(x, y);
+                map.addVertex(position, currentTile);
+            }
+        }
 
-                // Add the current tile as a vertex in the graph
-                map.addVertex(new Vector(x, y), currentTile);
+        for (int x = 0; x < WIDTH; x++) {
+            for (int y = 0; y < HEIGHT; y++) {
+                Vector position = new Vector(x, y);
 
                 // Check neighboring tiles and add edges if they are passages
                 if (x > 0 && grid[x - 1][y].getState() == TileState.PASSAGE) {
-                    map.addEdge(new Vector(x, y), new Vector(x - 1, y), 1);
+                    map.addEdge(position, new Vector(x - 1, y), 1);
                 }
                 if (x < WIDTH - 1 && grid[x + 1][y].getState() == TileState.PASSAGE) {
-                    map.addEdge(new Vector(x, y), new Vector(x + 1, y), 1);
+                    map.addEdge(position, new Vector(x + 1, y), 1);
                 }
                 if (y > 0 && grid[x][y - 1].getState() == TileState.PASSAGE) {
-                    map.addEdge(new Vector(x, y), new Vector(x, y - 1), 1);
+                    map.addEdge(position, new Vector(x, y - 1), 1);
                 }
                 if (y < HEIGHT - 1 && grid[x][y + 1].getState() == TileState.PASSAGE) {
-                    map.addEdge(new Vector(x, y), new Vector(x, y + 1), 1);
+                    map.addEdge(position, new Vector(x, y + 1), 1);
                 }
             }
         }
@@ -118,6 +145,8 @@ public class Map {
         bomb.paint();
         for(Enemy enemy : enemies){
             enemy.paint();
+            Thread thread = new Thread(enemy);
+            thread.start();
         }
     }
 

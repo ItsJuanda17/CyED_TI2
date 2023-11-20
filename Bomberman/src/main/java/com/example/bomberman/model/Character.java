@@ -15,7 +15,9 @@ public abstract class Character extends GameEntity{
         RUN_RIGHT
     }
 
-    protected int speed;
+    protected static final int WIDTH = Tile.TILE_WIDTH-5;
+    protected static final int HEIGHT = Tile.TILE_HEIGHT-5;
+    protected double speed;
     protected int lives;
     protected int frame;
     protected CharacterState state;
@@ -26,6 +28,7 @@ public abstract class Character extends GameEntity{
     protected ArrayList<Image> runRight;
     protected ArrayList<Image> death;
     protected Map map;
+    protected boolean isDead;
 
     public Character(Canvas canvas, Map map) {
         super(canvas);
@@ -38,10 +41,10 @@ public abstract class Character extends GameEntity{
         this.map = map;
     }
 
-    public int getSpeed() {
+    public double getSpeed() {
         return speed;
     }
-    public void setSpeed(int speed) {
+    public void setSpeed(double speed) {
         this.speed = speed;
     }
 
