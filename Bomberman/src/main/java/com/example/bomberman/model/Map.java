@@ -39,6 +39,7 @@ public class Map {
 
         this.enemies = new ArrayList<>();
         Random random = new Random();
+
         int enemyCount = random.nextInt(3) + 5;
         for(int i = 0; i < enemyCount; i++){
             Enemy enemy = new Enemy(canvas, this, getRandomPosition());
@@ -71,6 +72,10 @@ public class Map {
 
     public ArrayList<Enemy> getEnemies() {
         return enemies;
+    }
+
+    public GameEntity getExitPoint() {
+        return exitPoint;
     }
 
     private void createMap() {
@@ -169,4 +174,6 @@ public class Map {
     public void setOnKeyReleased(KeyEvent event){
         player.setOnKeyReleased(event);
     }
+
+
 }

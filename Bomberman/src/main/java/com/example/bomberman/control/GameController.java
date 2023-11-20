@@ -1,9 +1,13 @@
 package com.example.bomberman.control;
 
+import com.example.bomberman.HelloApplication;
 import com.example.bomberman.model.Map;
 import javafx.application.Platform;
 import javafx.fxml.FXML;
+import javafx.fxml.FXMLLoader;
 import javafx.fxml.Initializable;
+import javafx.print.PageRange;
+import javafx.scene.Scene;
 import javafx.scene.canvas.Canvas;
 import javafx.scene.canvas.GraphicsContext;
 import javafx.scene.image.Image;
@@ -11,9 +15,11 @@ import javafx.scene.layout.AnchorPane;
 import javafx.scene.paint.Color;
 import javafx.scene.text.Font;
 import javafx.scene.text.FontWeight;
+import javafx.stage.Stage;
 
 import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
+import java.io.IOException;
 import java.io.InputStream;
 import java.net.URL;
 import java.util.ResourceBundle;
@@ -42,17 +48,19 @@ public class GameController implements Initializable {
 
     @FXML
     private AnchorPane root;
-
+    private int currentMapIndex;
     private Map currentMap;
     private Clip bombClip;
+    private boolean win;
 
 
     @Override
     public void initialize(URL url, ResourceBundle resourceBundle) {
         this.gameGc = gameCanvas.getGraphicsContext2D();
         this.statsGc = statsCanvas.getGraphicsContext2D();
-
-        this.currentMap = new Map(this.gameCanvas);
+        initMaps();
+        initActions();
+        this.currentMap = maps.get(currentMapIndex);
 
         try {
             String soundPath = "/Sounds/soundtrack/01_Bomberman-Hero-Foehn.wav";
@@ -87,12 +95,10 @@ public class GameController implements Initializable {
             e.printStackTrace();
         }
 
-        initActions();
-
         new Thread(() -> {
             while (true) {
                 Platform.runLater(() -> {
-                    paint();
+                    mainGame();
                 });
                 try {
                     Thread.sleep(75);
@@ -101,6 +107,27 @@ public class GameController implements Initializable {
                 }
             }
         }).start();
+    }
+
+    private void mainGame(){
+        paint();
+
+        if(currentMap.getPlayer().getLives() == 0) {
+            win = false;
+            finishGame();
+        }
+
+        if(currentMap.getEnemies().isEmpty() && currentMap.getPlayer().getPosition().equals(currentMap.getExitPoint().getPosition())){
+            loadNextMap();
+        }
+    }
+
+
+    public void initMaps(){
+        for(int i = 0; i < MAX_MAPS; i++){
+            maps.add(new Map(gameCanvas));
+        }
+        this.currentMapIndex = 0;
     }
 
     public void initActions(){
@@ -114,12 +141,38 @@ public class GameController implements Initializable {
         });
     }
 
+    private void loadNextMap() {
+        if(currentMapIndex == MAX_MAPS - 1){
+            win = true;
+            finishGame();
+        }else {
+            currentMapIndex++;
+            currentMap = maps.get(currentMapIndex);
+        }
+    }
+
+    private void finishGame() {
+        gameOverScreen();
+    }
+
+    private void gameOverScreen() {
+        try {
+            FXMLLoader gameOverLoader = new FXMLLoader(HelloApplication.class.getResource("/com/example/bomberman/game-over-view.fxml"));
+            Scene gameOverScene = new Scene(gameOverLoader.load(), 600, 400);
+            GameOverController gameOverController = gameOverLoader.getController();
+            gameOverController.setWin(win);
+            Stage stage = (Stage) gameCanvas.getScene().getWindow();
+            stage.setScene(gameOverScene);
+            stage.show();
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+    }
+
     public void paint(){
         paintStatsPanel();
         currentMap.paint();
     }
-
-
 
     private void paintStatsPanel(){
         int iconSize = 50;
