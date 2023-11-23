@@ -7,6 +7,7 @@ import com.example.bomberman.control.GameController;
 import javafx.scene.canvas.Canvas;
 import javafx.scene.canvas.GraphicsContext;
 import javafx.scene.image.Image;
+import javafx.scene.input.KeyCode;
 import javafx.scene.input.KeyEvent;
 import javafx.scene.paint.Color;
 
@@ -28,6 +29,8 @@ public class Map {
     private IGraph<Vector, Tile> map;
     private Player player;
     private Bomb bomb;
+
+    private Explosion explosion;
     private ArrayList<Enemy> enemies;
 
     public Map(Canvas canvas) {
@@ -46,7 +49,8 @@ public class Map {
         }
 
         this.player = new Player(canvas, this);
-        this.bomb = new Bomb(canvas);
+        this.bomb = new Bomb(canvas, this, player.getPosition().getPosX(), player.getPosition().getPosY());
+        this.explosion = new Explosion(canvas , bomb.getPosition());
         this.exitImage = new Image(Objects.requireNonNull(getClass().getResourceAsStream("/images/walls/exit-00.png")), Tile.TILE_WIDTH, Tile.TILE_HEIGHT, false, false);
     }
 
@@ -142,7 +146,7 @@ public class Map {
     public void paint(){
         paintMap();
         player.paint();
-        bomb.paint();
+
         for(Enemy enemy : enemies){
             enemy.paint();
             Thread thread = new Thread(enemy);
@@ -162,11 +166,16 @@ public class Map {
         exitPoint.getGc().drawImage(exitImage, exitPoint.getX() * Tile.TILE_WIDTH, exitPoint.getY() * Tile.TILE_HEIGHT);
     }
 
+
+
     public void setOnKeyPressed(KeyEvent event){
         player.setOnKeyPressed(event);
     }
 
-    public void setOnKeyReleased(KeyEvent event){
-        player.setOnKeyReleased(event);
+    public void setOnKeyReleased (KeyEvent event){
+            player.setOnKeyReleased(event);
     }
+
+
+
 }

@@ -1,6 +1,7 @@
 package com.example.bomberman.model;
 
 import javafx.scene.image.Image;
+import javafx.scene.input.KeyCode;
 import javafx.scene.input.KeyEvent;
 import javafx.scene.canvas.Canvas;
 
@@ -119,10 +120,11 @@ public class Player extends Character implements IExploitable {
     }
 
     public void incrementBombCount() {
-        Bomb newBomb = new Bomb(this.canvas);
-        newBomb.dropBomb(this.position, 3, 1);
+        Bomb newBomb = new Bomb(this.canvas, this.map, this.getPosition().getPosX(), this.getPosition().getPosY());
+        newBomb.dropBomb(3, 1, this.getPosition().getPosX(), this.getPosition().getPosY());
         this.bombs.add(newBomb);
     }
+
 
     public void incrementBombRange() {
         int newRange = 2;
@@ -134,7 +136,8 @@ public class Player extends Character implements IExploitable {
     }
 
     public void setOnKeyPressed(KeyEvent event) {
-        switch (event.getCode()) {
+        KeyCode keyPressed = event.getCode();
+        switch (keyPressed) {
             case UP -> {
                 state = lastDirection = CharacterState.RUN_UP;
                 upPressed = true;
@@ -150,6 +153,9 @@ public class Player extends Character implements IExploitable {
             case RIGHT -> {
                 state = lastDirection = CharacterState.RUN_RIGHT;
                 rightPressed = true;
+            }
+            case SPACE -> {
+                incrementBombCount();
             }
         }
     }

@@ -20,23 +20,31 @@ public class Bomb extends GameEntity {
     private Timer explosionTimer;
     private ArrayList<Image> idle;
 
+    private ArrayList<Explosion> explosions;
+
+    private Vector playerPosition;
+
     private int timer;
     private int currentFrame;
 
-    public Bomb(Canvas canvas) {
+    private Map map;
+
+    public Bomb(Canvas canvas , Map map , int playerX , int playerY) {
         super(canvas);
-        initializeBomb();
+        this.map = map;
+        this.explosions = new ArrayList<>();
+        initializeBomb(playerX, playerY);
     }
 
-    private void initializeBomb() {
+    private void initializeBomb(int playerX, int playerY) {
         this.width = 25;
         this.height = 25;
         this.timer = 3;
         this.fireRange = 1;
         this.exploded = false;
         this.currentFrame = 0;
-        this.position = new Vector(0, 0);
         this.idle = new ArrayList<>();
+        this.position = new Vector(playerX, playerY);
 
         for (int i = 0; i < IDLE_FRAMES; i++) {
 
@@ -44,13 +52,14 @@ public class Bomb extends GameEntity {
         }
     }
 
-    public void dropBomb(Vector position, int timer, int fireRange) {
-        setPosition(position);
+    public void dropBomb(int timer, int fireRange, int playerX, int playerY) {
+        this.position = new Vector(playerX, playerY);
         this.timer = timer;
         this.fireRange = Math.min(fireRange, MAX_FIRE_RANGE);
         startExplosionTimer();
         startAnimationTimer();
     }
+
 
     private void startExplosionTimer() {
         explosionTimer = new Timer();
@@ -64,6 +73,7 @@ public class Bomb extends GameEntity {
 
     private void explode() {
         exploded = true;
+        explosions.add(new Explosion(canvas, position));
     }
 
     private void startAnimationTimer() {
@@ -91,8 +101,12 @@ public class Bomb extends GameEntity {
         this.fireRange = Math.min(newFireRange, MAX_FIRE_RANGE);
     }
 
+
+
+
     @Override
     public void paint() {
-        gc.drawImage(idle.get(currentFrame), position.getPosX(), position.getPosY());
+        gc.drawImage(idle.get(currentFrame), position.getPosX() * Tile.TILE_WIDTH, position.getPosY() * Tile.TILE_HEIGHT);
     }
+
 }

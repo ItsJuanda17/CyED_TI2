@@ -55,7 +55,7 @@ public class GameController implements Initializable {
         this.currentMap = new Map(this.gameCanvas);
 
         try {
-            String soundPath = "/Sounds/soundtrack/01_Bomberman-Hero-Foehn.wav";
+            String soundPath = "/Sounds/soundtrack/06_Bomberman-Hero-Cell.wav";
             InputStream inputStream = getClass().getResourceAsStream(soundPath);
 
             if (inputStream != null) {
@@ -127,7 +127,7 @@ public class GameController implements Initializable {
         Image bombIcon = new Image(Objects.requireNonNull(getClass().getResourceAsStream("/images/statsPanel/icon-bomb.png")), iconSize, iconSize, false, false);
         Image enemyIcon = new Image(Objects.requireNonNull(getClass().getResourceAsStream("/images/statsPanel/icon-enemy.png")), iconSize, iconSize, false, false);
 
-        // Establecer el color de fondo en gris
+
         statsGc.setFill(Color.ORANGE);
         statsGc.fillRect(0, 0, statsCanvas.getWidth(), statsCanvas.getHeight());
 
