@@ -1,0 +1,23 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<?import javafx.scene.canvas.*?>
+<?import javafx.scene.control.*?>
+<?import javafx.scene.layout.*?>
+<?import javafx.scene.text.*?>
+
+<AnchorPane maxHeight="-Infinity" maxWidth="-Infinity" minHeight="-Infinity" minWidth="-Infinity" prefHeight="400.0" prefWidth="600.0" xmlns="http://javafx.com/javafx/17.0.2-ea" xmlns:fx="http://javafx.com/fxml/1" fx:controller="com.example.bomberman.control.GameOverController">
+    <children>
+      <Canvas fx:id="canvas" height="400.0" width="600.0" />
+        <Label fx:id="label" alignment="CENTER" layoutY="136.0" prefHeight="35.0" prefWidth="600.0" text="Game Over">
+            <font>
+                <Font size="24.0" />
+            </font>
+        </Label>
+      <HBox fx:id="hBox" layoutX="32.0" layoutY="200.0" prefHeight="100.0" prefWidth="536.0">
+         <children>
+            <Button fx:id="continueButton" mnemonicParsing="false" onAction="#restart" text="Continue?" />
+            <Button fx:id="exitButton" mnemonicParsing="false" onAction="#exit" text="Exit" />
+         </children>
+      </HBox>
+    </children>
+</AnchorPane>
