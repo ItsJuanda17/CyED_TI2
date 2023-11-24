@@ -9,8 +9,6 @@ public class RandomMapGenerator {
     private int width;
     private int height;
     private Tile[][] grid;
-    private Tile startTile;
-    private Tile endTile;
     private Random random;
 
     public RandomMapGenerator(Canvas canvas, int width, int height) {
@@ -27,29 +25,22 @@ public class RandomMapGenerator {
         return grid;
     }
 
-    public Tile getStartTile() {
-        return startTile;
-    }
-
-    public Tile getExitTile() {
-        return endTile;
-    }
-
-    private Tile getRandomTile() {
-        int x = random.nextInt(width);
-        int y = random.nextInt(height);
-        return grid[x][y];
-    }
-
     private void generateBreakableWalls(){
-        int breakableWalls = (int) (width * height * 0.2);
-        for(int i = 0; i < breakableWalls; i++){
-            Tile tile = getRandomTile();
-            if(tile.getState() == TileState.BLOCKED){
-                tile.setState(TileState.BREAKABLE_WALL);
-            }else{
-                i--;
+        List<Tile> walls = new ArrayList<>();
+        for(int i = 0; i < width; i++){
+            for(int j = 0; j < height ; j++){
+                if(grid[i][j].getState() == TileState.BLOCKED){
+                    walls.add(grid[i][j]);
+                }
             }
+        }
+
+        int breakableWalls = (int) (walls.size() * 0.5);
+        while(breakableWalls > 0){
+            Tile wall = walls.get(random.nextInt(walls.size()));
+            wall.setState(TileState.BREAKABLE_WALL);
+            walls.remove(wall);
+            breakableWalls--;
         }
     }
 
@@ -78,7 +69,6 @@ public class RandomMapGenerator {
         int y = random.nextInt(height);
 
         grid[x][y].setState(TileState.PASSAGE);
-        startTile = grid[x][y]; // set start tile
 
         // Frontier cell is a cell with distance 2 in state Blocked and within the grid.
         Set<Tile> frontierTiles = new HashSet<>(frontierTilesOf(grid[x][y]));
@@ -101,10 +91,6 @@ public class RandomMapGenerator {
             frontierTiles.addAll(frontierTilesOf(frontierTile));
             //Remove the chosen frontier cell from the list of frontier cells.
             frontierTiles.remove(frontierTile);
-
-            if(frontierTiles.isEmpty()){
-                endTile = frontierTile; // set end tile as the last frontier tile
-            }
         }
     }
 
@@ -157,33 +143,20 @@ public class RandomMapGenerator {
     public void printMap() {
         for (int y = 0; y < height; y++) {
             for (int x = 0; x < width; x++) {
-                if(grid[x][y].equals(startTile)) {
-                    System.out.print("S");
-                }else if(grid[x][y].equals(endTile)) {
-                    System.out.print("E");
-                }else {
-                    System.out.print(grid[x][y].getState() == TileState.PASSAGE ? " " : grid[x][y].getState() == TileState.BREAKABLE_WALL ? "X" : "#");
-                }
+                System.out.print(grid[x][y].getState() == TileState.PASSAGE ? " " : grid[x][y].getState() == TileState.BREAKABLE_WALL ? "X" : "#");
             }
             System.out.println();
         }
     }
 
     public void paint(){
-        startTile.getGc().setFill(Color.GREEN);
-        startTile.getGc().fillRect(startTile.getX() * 10, startTile.getY() * 10, 10, 10);
-        endTile.getGc().setFill(Color.RED);
-        endTile.getGc().fillRect(endTile.getX() * 10, endTile.getY() * 10, 10, 10);
         for (int y = 0; y < height; y++) {
             for (int x = 0; x < width; x++) {
-                if(!grid[x][y].equals(startTile) && !grid[x][y].equals(endTile)) {
-                    grid[x][y].getGc().setFill(grid[x][y].getState() == TileState.PASSAGE ? Color.WHITE : grid[x][y].getState() == TileState.BREAKABLE_WALL ? Color.GRAY : Color.BLACK);
-                    grid[x][y].getGc().fillRect(x * 10, y * 10, 10, 10);
-                }
+                grid[x][y].getGc().setFill(grid[x][y].getState() == TileState.PASSAGE ? Color.WHITE : grid[x][y].getState() == TileState.BREAKABLE_WALL ? Color.GRAY : Color.BLACK);
+                grid[x][y].getGc().fillRect(x * 10, y * 10, 10, 10);
             }
         }
     }
 
 }
-
 
