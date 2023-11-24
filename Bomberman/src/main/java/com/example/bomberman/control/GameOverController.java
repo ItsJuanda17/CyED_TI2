@@ -78,7 +78,7 @@ public class GameOverController implements Initializable {
 
     public void restart() {
         try {
-            FXMLLoader gameLoader = new FXMLLoader(HelloApplication.class.getResource("hello-view.fxml"));
+            FXMLLoader gameLoader = new FXMLLoader(GameOverController.class.getResource("/com/example/bomberman/hello-view.fxml"));
             Scene gameScene = new Scene(gameLoader.load(), 1200, 600);
             Stage stage = (Stage) continueButton.getScene().getWindow();
             stage.setResizable(false);
@@ -91,5 +91,5 @@ public class GameOverController implements Initializable {
 
     public void exit() {
         System.exit(0);
-    }
+}
 }

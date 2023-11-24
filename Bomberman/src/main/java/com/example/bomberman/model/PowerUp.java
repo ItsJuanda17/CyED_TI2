@@ -8,8 +8,8 @@ import java.util.Objects;
 public class PowerUp extends GameEntity{
 
     public enum PowerUpType {
-        BOMB(new Image(Objects.requireNonNull(PowerUpType.class.getResourceAsStream("/images/powerUps/power_bomb.png")))),
-        RANGE(new Image(Objects.requireNonNull(PowerUpType.class.getResourceAsStream("/images/powerUps/power_fireup.png")))),
+        BOMB_COUNT(new Image(Objects.requireNonNull(PowerUpType.class.getResourceAsStream("/images/powerUps/power_bomb.png")))),
+        BOMB_RANGE(new Image(Objects.requireNonNull(PowerUpType.class.getResourceAsStream("/images/powerUps/power_fireup.png")))),
         SPEED(new Image(Objects.requireNonNull(PowerUpType.class.getResourceAsStream("/images/powerUps/power_speed.png"))));
 
         private Image image;
@@ -38,10 +38,10 @@ public class PowerUp extends GameEntity{
 
     public void grantBonus(Player player) {
         switch (this.type) {
-            case BOMB:
+            case BOMB_COUNT:
                 player.incrementBombCount();
                 break;
-            case RANGE:
+            case BOMB_RANGE:
                 player.incrementBombRange();
                 break;
             case SPEED:
@@ -51,7 +51,15 @@ public class PowerUp extends GameEntity{
     }
 
     @Override
+    public void onCollision(GameEntity other) {
+        if(other instanceof Player) {
+            grantBonus((Player) other);
+        }
+    }
+
+    @Override
     public void paint() {
         gc.drawImage(this.type.getImage(), this.position.getPosX(), this.position.getPosY(), this.width, this.height);
     }
+
 }

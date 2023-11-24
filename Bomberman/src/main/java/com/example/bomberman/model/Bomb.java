@@ -73,8 +73,24 @@ public class Bomb extends GameEntity {
 
     private void explode() {
         exploded = true;
-        explosions.add(new Explosion(canvas, position));
+
+        Explosion explosionUp = new Explosion(canvas, new Vector(position.getPosX(), position.getPosY() - 1));
+        Explosion explosionDown = new Explosion(canvas, new Vector(position.getPosX(), position.getPosY() + 1));
+        Explosion explosionLeft = new Explosion(canvas, new Vector(position.getPosX() - 1, position.getPosY()));
+        Explosion explosionRight = new Explosion(canvas, new Vector(position.getPosX() + 1, position.getPosY()));
+
+        explosions.add(explosionUp);
+        explosions.add(explosionDown);
+        explosions.add(explosionLeft);
+        explosions.add(explosionRight);
+
+        explosionUp.startExplosion();
+        explosionDown.startExplosion();
+        explosionLeft.startExplosion();
+        explosionRight.startExplosion();
     }
+
+
 
     private void startAnimationTimer() {
         Timer animationTimer = new Timer();
@@ -101,12 +117,22 @@ public class Bomb extends GameEntity {
         this.fireRange = Math.min(newFireRange, MAX_FIRE_RANGE);
     }
 
-
+    public ArrayList<Explosion> getExplosions() {
+        return explosions;
+    }
 
 
     @Override
-    public void paint() {
-        gc.drawImage(idle.get(currentFrame), position.getPosX() * Tile.TILE_WIDTH, position.getPosY() * Tile.TILE_HEIGHT);
+    public void onCollision(GameEntity other) {
+
     }
+
+    @Override
+    public void paint() {
+        updateHitBox();
+        paintHitBox();
+        gc.drawImage(idle.get(currentFrame), position.getPosX() * Tile.TILE_WIDTH, position.getPosY() * Tile.TILE_HEIGHT);
+
+}
 
 }

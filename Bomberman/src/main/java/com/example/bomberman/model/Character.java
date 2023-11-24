@@ -69,6 +69,10 @@ public abstract class Character extends GameEntity{
         this.map = map;
     }
 
+    public boolean isDead() {
+        return isDead;
+    }
+
     public abstract void move();
 
     public abstract void die();

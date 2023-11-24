@@ -29,7 +29,16 @@ public class Wall extends GameEntity{
     }
 
     @Override
+    public void onCollision(GameEntity other) {
+        if(other instanceof Player) {
+            onCollision(other);
+        }
+    }
+
+    @Override
     public void paint() {
+        updateHitBox();
+        paintHitBox();
         gc.drawImage(idle, position.getPosX()*Tile.TILE_WIDTH, position.getPosY()*Tile.TILE_HEIGHT);
     }
 }

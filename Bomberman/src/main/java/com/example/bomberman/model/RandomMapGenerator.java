@@ -21,6 +21,8 @@ public class RandomMapGenerator {
         generateMap(canvas);
         generateBreakableWalls();
         surroundByWalls();
+        startTile.setState(TileState.PASSAGE);
+        endTile.setState(TileState.PASSAGE);
     }
 
     public Tile[][] getGrid() {
@@ -42,14 +44,21 @@ public class RandomMapGenerator {
     }
 
     private void generateBreakableWalls(){
-        int breakableWalls = (int) (width * height * 0.2);
-        for(int i = 0; i < breakableWalls; i++){
-            Tile tile = getRandomTile();
-            if(tile.getState() == TileState.BLOCKED){
-                tile.setState(TileState.BREAKABLE_WALL);
-            }else{
-                i--;
+        List<Tile> walls = new ArrayList<>();
+        for(int i = 0; i < width; i++){
+            for(int j = 0; j < height ; j++){
+                if(grid[i][j].getState() == TileState.BLOCKED){
+                    walls.add(grid[i][j]);
+                }
             }
+        }
+
+        int breakableWalls = (int) (walls.size() * 0.5);
+        while(breakableWalls > 0){
+            Tile wall = walls.get(random.nextInt(walls.size()));
+            wall.setState(TileState.BREAKABLE_WALL);
+            walls.remove(wall);
+            breakableWalls--;
         }
     }
 
@@ -181,9 +190,7 @@ public class RandomMapGenerator {
                     grid[x][y].getGc().fillRect(x * 10, y * 10, 10, 10);
                 }
             }
-        }
+       }
     }
 
 }
-
-

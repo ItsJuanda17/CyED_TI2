@@ -37,8 +37,12 @@ public class Tile extends GameEntity{
     }
 
     @Override
-    public void paint(){
+    public void onCollision(GameEntity other) {
+        content.onCollision(other);
+    }
 
+    @Override
+    public void paint(){
         if(content != null) {
             content.paint();
         }else {
@@ -67,7 +71,7 @@ public class Tile extends GameEntity{
                 "position=" + position +
                 ", content=" + content +
                 ", state=" + state +
-                '}';
+             '}';
     }
 
 }

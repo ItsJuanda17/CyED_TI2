@@ -52,7 +52,8 @@ public class GameController implements Initializable {
     private Map currentMap;
     private Clip bombClip;
     private boolean win;
-
+    private Thread mainGameThread;
+    private boolean isGameRunning;
 
     @Override
     public void initialize(URL url, ResourceBundle resourceBundle) {
@@ -61,6 +62,7 @@ public class GameController implements Initializable {
         initMaps();
         initActions();
         this.currentMap = maps.get(currentMapIndex);
+        this.isGameRunning = true;
 
         try {
             String soundPath = "/Sounds/soundtrack/06_Bomberman-Hero-Cell.wav";
@@ -95,24 +97,25 @@ public class GameController implements Initializable {
             e.printStackTrace();
         }
 
-        new Thread(() -> {
-            while (true) {
+        mainGameThread = new Thread(() -> {
+            while (isGameRunning) {
                 Platform.runLater(() -> {
                     mainGame();
                 });
                 try {
-                    Thread.sleep(75);
+                    Thread.sleep(100);
                 } catch (InterruptedException e) {
-                    e.printStackTrace();
+                    Thread.currentThread().interrupt();
+                    break;
                 }
             }
-        }).start();
+        });
+
+        mainGameThread.start();
     }
 
     private void mainGame(){
-        paint();
-
-        if(currentMap.getPlayer().getLives() == 0) {
+        if(currentMap.getPlayer().isDead()) {
             win = false;
             finishGame();
         }
@@ -120,6 +123,8 @@ public class GameController implements Initializable {
         if(currentMap.getEnemies().isEmpty() && currentMap.getPlayer().getPosition().equals(currentMap.getExitPoint().getPosition())){
             loadNextMap();
         }
+
+        paint();
     }
 
 
@@ -152,15 +157,16 @@ public class GameController implements Initializable {
     }
 
     private void finishGame() {
+        isGameRunning = false;
+        mainGameThread.interrupt();
+        bombClip.stop();
         gameOverScreen();
     }
 
     private void gameOverScreen() {
         try {
-            FXMLLoader gameOverLoader = new FXMLLoader(HelloApplication.class.getResource("/com/example/bomberman/game-over-view.fxml"));
+            FXMLLoader gameOverLoader = new FXMLLoader(GameController.class.getResource("/com/example/bomberman/game-over-view.fxml"));
             Scene gameOverScene = new Scene(gameOverLoader.load(), 600, 400);
-            GameOverController gameOverController = gameOverLoader.getController();
-            gameOverController.setWin(win);
             Stage stage = (Stage) gameCanvas.getScene().getWindow();
             stage.setScene(gameOverScene);
             stage.show();
@@ -180,8 +186,7 @@ public class GameController implements Initializable {
         Image bombIcon = new Image(Objects.requireNonNull(getClass().getResourceAsStream("/images/statsPanel/icon-bomb.png")), iconSize, iconSize, false, false);
         Image enemyIcon = new Image(Objects.requireNonNull(getClass().getResourceAsStream("/images/statsPanel/icon-enemy.png")), iconSize, iconSize, false, false);
 
-
-        statsGc.setFill(Color.ORANGE);
+        statsGc.setFill(Color.GRAY);
         statsGc.fillRect(0, 0, statsCanvas.getWidth(), statsCanvas.getHeight());
 
         int hearthDistance = 65;
@@ -197,9 +202,8 @@ public class GameController implements Initializable {
         statsGc.drawImage(enemyIcon, 650, 25);
         statsGc.setFill(Color.BLACK);
         statsGc.setFont(Font.font("Arial", FontWeight.EXTRA_BOLD, 50));
-        statsGc.fillText(""+currentMap.getEnemies().size(), 700, 75);
-    }
+        statsGc.fillText(""+currentMap.getEnemies().size(), 700,75);
 
-
+}
 
 }

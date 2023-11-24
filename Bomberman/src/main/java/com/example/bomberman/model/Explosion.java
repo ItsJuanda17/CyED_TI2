@@ -17,17 +17,21 @@ public class Explosion extends GameEntity {
 
     private Image[] images;
 
-    public Explosion(Canvas canvas , Vector position) {
+    private boolean exploded;
+
+    private Map map;
+
+    public Explosion(Canvas canvas, Vector position) {
         super(canvas);
-        initializeExplosion();
-        this.position = position;
+        initializeExplosion(position);
+        this.exploded = false;
     }
 
-    private void initializeExplosion() {
+    private void initializeExplosion(Vector position) {
         this.width = 25;
         this.height = 25;
         this.currentFrame = 0;
-        this.position = new Vector(0, 0);
+        this.position = position;
         this.images = new Image[NUM_FRAMES];
 
         for (int i = 0; i < NUM_FRAMES; i++) {
@@ -35,7 +39,7 @@ public class Explosion extends GameEntity {
         }
     }
 
-    public void startExplosion(Vector position) {
+    public void startExplosion() {
         setPosition(position);
         startExplosionTimer();
         startAnimationTimer();
@@ -52,6 +56,7 @@ public class Explosion extends GameEntity {
     }
 
     private void finishExplosion() {
+        exploded = true;
         explosionTimer.cancel();
         explosionTimer.purge();
     }
@@ -63,16 +68,33 @@ public class Explosion extends GameEntity {
             public void run() {
                 animate();
             }
-        }, 0, 100);  // Ajusta la velocidad de la animación según sea necesario
+        }, 0, 100);
     }
 
     private void animate() {
-        currentFrame = (currentFrame + 1) % NUM_FRAMES;
-        paint();
+        if (!exploded) {
+            currentFrame = (currentFrame + 1) % NUM_FRAMES;
+            paint();
+        }
+
+        if (exploded && currentFrame == NUM_FRAMES - 1) {
+            finishExplosion();
+        }
+    }
+
+    @Override
+    public void onCollision(GameEntity other) {
+        if(other instanceof Player || other instanceof Enemy) {
+            other.onCollision(this);
+        }
     }
 
     @Override
     public void paint() {
-        gc.drawImage(images[currentFrame], position.getPosX(), position.getPosY());
-    }
+        updateHitBox();
+        paintHitBox();
+        gc.drawImage(images[currentFrame], position.getPosX() * Tile.TILE_WIDTH, position.getPosY() * Tile.TILE_HEIGHT);
+        }
+
 }
+

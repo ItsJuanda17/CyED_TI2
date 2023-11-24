@@ -8,7 +8,7 @@ import javafx.scene.canvas.Canvas;
 import java.util.ArrayList;
 import java.util.Objects;
 
-public class Player extends Character implements IExploitable {
+public class Player extends Character {
 
     private ArrayList<Bomb> bombs;
     private boolean upPressed;
@@ -61,36 +61,39 @@ public class Player extends Character implements IExploitable {
     @Override
     public void move() {
         int moveAmount = 1;
-        Vector originalPosition = new Vector(position.getPosX(), position.getPosY());
 
         if (upPressed) {
-            position.setPosY(position.getPosY() - moveAmount);
+            if(!map.isNextTileBlocked(position.getPosX(), position.getPosY() - moveAmount)) {
+                position.setPosY(position.getPosY() - moveAmount);
+            }
         }
         if (downPressed) {
-            position.setPosY(position.getPosY() + moveAmount);
+            if(!map.isNextTileBlocked(position.getPosX(), position.getPosY() + moveAmount)) {
+                position.setPosY(position.getPosY() + moveAmount);
+            }
         }
         if (leftPressed) {
-            position.setPosX(position.getPosX() - moveAmount);
+            if(!map.isNextTileBlocked(position.getPosX()  - moveAmount, position.getPosY())) {
+                position.setPosX(position.getPosX() - moveAmount);
+            }
         }
         if (rightPressed) {
-            position.setPosX(position.getPosX() + moveAmount);
+            if(!map.isNextTileBlocked(position.getPosX() + moveAmount, position.getPosY())) {
+                position.setPosX(position.getPosX() + moveAmount);
+            }
         }
-
-        /*
-        if (map.collidesWithWalls(this)) {
-            position = originalPosition;
-        }
-         */
     }
 
     @Override
     public void die() {
-
+        isDead = true;
+        //logic for images
     }
 
     @Override
     public void paint() {
         move();
+        updateHitBox();
         switch (state) {
             case IDLE -> {
                 switch (lastDirection) {
@@ -160,7 +163,6 @@ public class Player extends Character implements IExploitable {
         }
     }
 
-
     public void setOnKeyReleased(KeyEvent event) {
         state = CharacterState.IDLE;
         switch (event.getCode()) {
@@ -179,7 +181,19 @@ public class Player extends Character implements IExploitable {
         }
     }
 
-    public Vector getPosition() {
-        return position;
+    @Override
+    public void onCollision(GameEntity other) {
+        if (other instanceof Enemy || other instanceof Explosion) {
+            this.lives--;
+
+            if (this.lives > 0) {
+                this.position = new Vector(map.getSpawnPoint().getX(), map.getSpawnPoint().getY());
+            } else if (this.lives == 0) {
+                die();
+            }
+        } else if (other instanceof PowerUp) {
+            other.onCollision(this);
+        }
     }
+
 }

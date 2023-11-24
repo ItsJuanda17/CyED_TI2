@@ -9,15 +9,10 @@ import java.util.Objects;
 import java.util.Queue;
 import java.util.Random;
 
-public class Enemy extends Character implements IExploitable, Runnable{
+public class Enemy extends Character implements Runnable{
 
+    private final static int RANGE_OF_SIGHT = 3;
     Queue<Vertex<Vector, Tile>> path;
-    private static final int MOVE_DURATION = 1000; // in milliseconds
-
-    private long startTime;
-    private Vector startPosition;
-    private Vector endPosition;
-    private boolean moving;
 
     public Enemy(Canvas canvas, Map map, Vector startPosition) {
         super(canvas, map);
@@ -60,6 +55,16 @@ public class Enemy extends Character implements IExploitable, Runnable{
         if(nextVertex == null) return;
         Vector nextPosition = nextVertex.getKey();
         moveTowards(nextPosition);
+
+        Queue<Vertex<Vector, Tile>> newPath = map.getMap().bfs(map.getPlayer().getPosition());
+        for(Vertex<Vector, Tile> vertex : newPath){
+            if(vertex.getDistance() < RANGE_OF_SIGHT){
+                path = newPath;
+                nextPosition = path.poll().getKey();
+                moveTowardsPlayer(nextPosition);
+                break;
+            }
+        }
     }
 
     private void moveTowards(Vector targetPosition) {
@@ -106,7 +111,7 @@ public class Enemy extends Character implements IExploitable, Runnable{
                             newPosY++;
                         }
                     }
-                break;
+                    break;
             }
 
             position.setPosX(newPosX);
@@ -126,10 +131,63 @@ public class Enemy extends Character implements IExploitable, Runnable{
         }
     }
 
+    private void moveTowardsPlayer(Vector targetPosition){
+        while(!position.equals(targetPosition)){
+            int newPosX = position.getPosX();
+            int newPosY = position.getPosY();
+
+            if(targetPosition.getPosX() < position.getPosX()){
+                state = CharacterState.RUN_LEFT;
+                Vector nextPos = new Vector(position.getPosX() - 1, position.getPosY());
+                if(isValidMove(nextPos)){
+                    newPosX--;
+                }
+            }
+
+            if(targetPosition.getPosX() > position.getPosX()){
+                state = CharacterState.RUN_RIGHT;
+                Vector nextPos = new Vector(position.getPosX() + 1, position.getPosY());
+                if(isValidMove(nextPos)){
+                    newPosX++;
+                }
+            }
+            if(targetPosition.getPosY() < position.getPosY()){
+                state = CharacterState.RUN_UP;
+                Vector nextPos = new Vector(position.getPosX(), position.getPosY() - 1);
+                if(isValidMove(nextPos)){
+                    newPosY--;
+                }
+            }
+            if(targetPosition.getPosY() > position.getPosY()){
+                state = CharacterState.RUN_DOWN;
+                Vector nextPos = new Vector(position.getPosX(), position.getPosY() + 1);
+                if(isValidMove(nextPos)){
+                    newPosY++;
+                }
+            }
+
+            position.setPosX(newPosX);
+            position.setPosY(newPosY);
+
+            try {
+                Thread.sleep(50000);
+            } catch (InterruptedException e) {
+                e.printStackTrace();
+            }
+        }
+
+        try {
+            Thread.sleep(50000);
+        } catch (InterruptedException e) {
+            e.printStackTrace();
+        }
+
+    }
+
     private boolean isValidMove(Vector position) {
         return position.getPosX() >= 0 && position.getPosX() < Map.WIDTH &&
                 position.getPosY() >= 0 && position.getPosY() < Map.HEIGHT &&
-                map.getMap().getVertex(position).getValue().getState() == TileState.PASSAGE;
+                !map.isNextTileBlocked(position.getPosX(), position.getPosY());
     }
 
     @Override
@@ -138,14 +196,24 @@ public class Enemy extends Character implements IExploitable, Runnable{
     }
 
     @Override
+    public void onCollision(GameEntity other) {
+        if(other instanceof Player){
+            other.onCollision(this);
+        }else if (other instanceof Explosion){
+            other.onCollision(this);
+        }
+    }
+
+    @Override
     public void paint() {
+        updateHitBox();
 
         switch (state) {
             case IDLE:
                 gc.drawImage(idle.get(0), position.getPosX()*Tile.TILE_WIDTH, position.getPosY()*Tile.TILE_HEIGHT);
                 break;
             case RUN_UP:
-               gc.drawImage(runUp.get(frame), position.getPosX()*Tile.TILE_WIDTH, position.getPosY()*Tile.TILE_HEIGHT);
+                gc.drawImage(runUp.get(frame), position.getPosX()*Tile.TILE_WIDTH, position.getPosY()*Tile.TILE_HEIGHT);
                 frame = (frame + 1) % runUp.size();
                 break;
             case RUN_DOWN:
@@ -163,7 +231,6 @@ public class Enemy extends Character implements IExploitable, Runnable{
         }
     }
 
-
     @Override
     public void run() {
         while(!isDead){
@@ -175,6 +242,7 @@ public class Enemy extends Character implements IExploitable, Runnable{
             } catch (InterruptedException e) {
                 e.printStackTrace();
             }
-        }
-    }
+  }
+}
+
 }

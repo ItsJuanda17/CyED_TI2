@@ -39,7 +39,7 @@ public class MenuController implements Initializable{
     @FXML
     private void startGame() {
         try {
-            FXMLLoader gameLoader = new FXMLLoader(HelloApplication.class.getResource("hello-view.fxml"));
+            FXMLLoader gameLoader = new FXMLLoader(MenuController.class.getResource("/com/example/bomberman/hello-view.fxml"));
             Scene gameScene = new Scene(gameLoader.load(), 1200, 600);
             Stage stage = (Stage) button.getScene().getWindow();
             stage.setResizable(false);
@@ -71,5 +71,5 @@ public class MenuController implements Initializable{
         double imageY = 10;
 
         gc.drawImage(title, imageX, imageY);
-    }
+}
 }
