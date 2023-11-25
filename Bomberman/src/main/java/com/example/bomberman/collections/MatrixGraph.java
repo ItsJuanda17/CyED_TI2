@@ -92,35 +92,39 @@ public class MatrixGraph<K, V> implements IGraph<K, V> {
 
     @Override
     public Queue<Vertex<K, V>> bfs(K key) {
-
-        for (Vertex<K, V> vertex : vertexMap.values()) {
-            vertex.setColor(Color.WHITE);
+        for(K k: vertexMap.keySet()){
+            Vertex<K, V> u = vertexMap.get(k);
+            u.setColor(Color.WHITE);
+            u.setDistance(Integer.MAX_VALUE);
+            u.setPredecessor(null);
         }
 
-        Vertex<K, V> startVertex = vertexMap.get(key);
+        Vertex<K, V> s = vertexMap.get(key);
+        if(s == null) return null;
+        s.setColor(Color.GRAY);
+        s.setDistance(0);
+        s.setPredecessor(null);
 
         Queue<Vertex<K, V>> queue = new LinkedList<>();
         Queue<Vertex<K, V>> path = new LinkedList<>();
-        startVertex.setColor(Color.GRAY);
-        queue.offer(startVertex);
-        path.offer(startVertex);
+        queue.offer(s);
+        path.offer(s);
 
         while (!queue.isEmpty()) {
-            Vertex<K, V> currentVertex = queue.poll();
-            path.offer(currentVertex);
-
-            for (Edge<K, V> edge : currentVertex.getEdges()) {
-                Vertex<K, V> neighbor = edge.getDestination();
-                if (neighbor.getColor() == Color.WHITE) {
-                    neighbor.setColor(Color.GRAY);
-                    queue.offer(neighbor);
-                    path.offer(neighbor);
+            Vertex<K, V> u = queue.poll();
+            for (Edge<K, V> edge : u.getEdges()) {
+                Vertex<K, V> v = edge.getDestination();
+                path.offer(u);
+                if (v.getColor() == Color.WHITE) {
+                    v.setColor(Color.GRAY);
+                    v.setDistance(u.getDistance() + 1);
+                    v.setPredecessor(u);
+                    queue.offer(v);
+                    path.offer(v);
                 }
             }
-
-            currentVertex.setColor(Color.BLACK);
+            u.setColor(Color.BLACK);
         }
-
         return path;
     }
 
@@ -180,7 +184,7 @@ public class MatrixGraph<K, V> implements IGraph<K, V> {
 
     @Override
     public Vertex<K, V> getVertex(K key) {
-        return null;
+        return vertexMap.get(key);
     }
 
     private int getVertexIndex(Vertex<K, V> vertex) {

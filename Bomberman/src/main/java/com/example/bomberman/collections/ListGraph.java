@@ -66,6 +66,7 @@ public class ListGraph<K, V> implements IGraph<K, V> {
         }
 
         Vertex<K, V> s = adjacencyList.get(key);
+        if(s == null) return null;
         s.setColor(Color.GRAY);
         s.setDistance(0);
         s.setPredecessor(null);

@@ -78,15 +78,19 @@ public class Map {
         int y = position.getPosY();
         if (x > 0 && grid[x - 1][y].getState() == TileState.PASSAGE) {
             map.removeEdge(position, new Vector(x - 1, y));
+            map.removeEdge(new Vector(x - 1, y), position);
         }
         if (x < WIDTH - 1 && grid[x + 1][y].getState() == TileState.PASSAGE) {
             map.removeEdge(position, new Vector(x + 1, y));
+            map.removeEdge(new Vector(x + 1, y), position);
         }
         if (y > 0 && grid[x][y - 1].getState() == TileState.PASSAGE) {
             map.removeEdge(position, new Vector(x, y - 1));
+            map.removeEdge(new Vector(x, y - 1), position);
         }
         if (y < HEIGHT - 1 && grid[x][y + 1].getState() == TileState.PASSAGE) {
             map.removeEdge(position, new Vector(x, y + 1));
+            map.removeEdge(new Vector(x, y + 1), position);
         }
     }
 
@@ -99,15 +103,19 @@ public class Map {
         int y = position.getPosY();
         if (x > 0 && grid[x - 1][y].getState() == TileState.PASSAGE) {
             map.addEdge(position, new Vector(x - 1, y), 1);
+            map.addEdge(new Vector(x - 1, y), position,1 );
         }
         if (x < WIDTH - 1 && grid[x + 1][y].getState() == TileState.PASSAGE) {
             map.addEdge(position, new Vector(x + 1, y), 1);
+            map.addEdge(new Vector(x + 1, y), position, 1);
         }
         if (y > 0 && grid[x][y - 1].getState() == TileState.PASSAGE) {
             map.addEdge(position, new Vector(x, y - 1), 1);
+            map.addEdge(new Vector(x, y - 1), position, 1);
         }
         if (y < HEIGHT - 1 && grid[x][y + 1].getState() == TileState.PASSAGE) {
             map.addEdge(position, new Vector(x, y + 1), 1);
+            map.addEdge(new Vector(x, y + 1), position, 1);
         }
     }
 
