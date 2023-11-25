@@ -162,6 +162,6 @@ public class Bomb extends GameEntity {
         updateHitBox();
 
         gc.drawImage(idle.get(currentFrame), position.getPosX() * Tile.TILE_WIDTH, position.getPosY() * Tile.TILE_HEIGHT);
-}
+    }
 
 }
