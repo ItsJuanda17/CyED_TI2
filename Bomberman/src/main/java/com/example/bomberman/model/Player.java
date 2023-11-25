@@ -5,7 +5,9 @@ import javafx.scene.input.KeyCode;
 import javafx.scene.input.KeyEvent;
 import javafx.scene.canvas.Canvas;
 
-import java.util.*;
+import java.util.ArrayList;
+import java.util.Objects;
+import java.util.Stack;
 
 public class Player extends Character {
 
@@ -17,9 +19,6 @@ public class Player extends Character {
     private boolean leftPressed;
     private boolean rightPressed;
     private CharacterState lastDirection;
-
-    private ArrayList<Image> deathFrames;
-
 
     public Player(Canvas canvas, Map map) {
         super(canvas, map);
@@ -38,11 +37,6 @@ public class Player extends Character {
         this.lastDirection = CharacterState.RUN_DOWN;
         this.frame = 0;
         this.position = new Vector(map.getSpawnPoint().getX(), map.getSpawnPoint().getY());
-
-        this.deathFrames = new ArrayList<>();
-        for (int i = 0; i < 5; i++) {
-            this.deathFrames.add(new Image(Objects.requireNonNull(getClass().getResourceAsStream("/images/bomberman/die/die-bomberman-0" + i + ".png")), WIDTH, HEIGHT, false, false));
-        }
 
         for(int i = 0; i < 4; i++) {
             this.idle.add(new Image(Objects.requireNonNull(getClass().getResourceAsStream("/images/bomberman/idle/bomberman-idle-0"+i+".png")), WIDTH, HEIGHT, false, false));
@@ -98,24 +92,6 @@ public class Player extends Character {
     @Override
     public void die() {
         isDead = true;
-        Timer deathTimer = new Timer();
-        int delay = 0;
-        int interval = 5000;
-        int numFrames = 5;
-        final int[] currentFrame = {0};
-        deathTimer.scheduleAtFixedRate(new TimerTask() {
-            @Override
-            public void run() {
-                if (currentFrame[0] < numFrames) {
-                    gc.clearRect(position.getPosX() * Tile.TILE_WIDTH, position.getPosY() * Tile.TILE_HEIGHT, Tile.TILE_WIDTH, Tile.TILE_HEIGHT);
-                    gc.drawImage(deathFrames.get(currentFrame[0]), position.getPosX() * Tile.TILE_WIDTH, position.getPosY() * Tile.TILE_HEIGHT);
-                    currentFrame[0]++;
-                } else {
-                    deathTimer.cancel();
-                    deathTimer.purge();
-                }
-            }
-        }, delay, interval);
     }
 
     @Override
@@ -160,10 +136,6 @@ public class Player extends Character {
 
     public void incrementBombRange() {
         this.bombs.forEach(Bomb::updateFireRange);
-    }
-
-    public void incrementSpeed() {
-        this.speed++;
     }
 
     public void setOnKeyPressed(KeyEvent event) {
