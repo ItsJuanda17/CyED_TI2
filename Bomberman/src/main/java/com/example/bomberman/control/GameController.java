@@ -1,23 +1,20 @@
 package com.example.bomberman.control;
 
-import com.example.bomberman.HelloApplication;
 import com.example.bomberman.model.Map;
-import javafx.animation.PauseTransition;
 import javafx.application.Platform;
 import javafx.fxml.FXML;
 import javafx.fxml.FXMLLoader;
 import javafx.fxml.Initializable;
-import javafx.print.PageRange;
 import javafx.scene.Scene;
 import javafx.scene.canvas.Canvas;
 import javafx.scene.canvas.GraphicsContext;
+import javafx.scene.control.Label;
 import javafx.scene.image.Image;
 import javafx.scene.layout.AnchorPane;
 import javafx.scene.paint.Color;
 import javafx.scene.text.Font;
 import javafx.scene.text.FontWeight;
 import javafx.stage.Stage;
-import javafx.util.Duration;
 
 import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
@@ -71,7 +68,7 @@ public class GameController implements Initializable {
             InputStream inputStream = getClass().getResourceAsStream(soundPath);
 
             if (inputStream != null) {
-
+                // Almacenar el contenido en un búfer
                 ByteArrayOutputStream buffer = new ByteArrayOutputStream();
                 int nRead;
                 byte[] data = new byte[1024];
@@ -91,7 +88,6 @@ public class GameController implements Initializable {
 
                 bombClip = AudioSystem.getClip();
                 bombClip.open(audioInputStream);
-                bombClip.loop(Clip.LOOP_CONTINUOUSLY);
                 bombClip.start();
             } else {
                 System.err.println("No se pudo encontrar el recurso: " + soundPath);
@@ -124,16 +120,11 @@ public class GameController implements Initializable {
         }
 
         if(currentMap.getEnemies().isEmpty() && currentMap.getPlayer().getPosition().equals(currentMap.getExitPoint().getPosition())){
-            PauseTransition pause = new PauseTransition(Duration.seconds(5));
-            pause.setOnFinished(event -> loadNextMap());
-            pause.play();
+            loadNextMap();
         }
 
-        if(isGameRunning) {
-            paint();
-        }
+        paint();
     }
-
 
 
     public void initMaps(){
@@ -164,6 +155,7 @@ public class GameController implements Initializable {
         }
     }
 
+
     private void finishGame() {
         isGameRunning = false;
         mainGameThread.interrupt();
@@ -188,7 +180,9 @@ public class GameController implements Initializable {
         currentMap.paint();
     }
 
-    private void paintStatsPanel(){
+    private void paintStatsPanel() {
+        root.getChildren().removeIf(node -> node instanceof Label);
+
         int iconSize = 50;
         Image heartRedIcon = new Image(Objects.requireNonNull(getClass().getResourceAsStream("/images/statsPanel/heart-red.png")), iconSize, iconSize, false, false);
         Image bombIcon = new Image(Objects.requireNonNull(getClass().getResourceAsStream("/images/statsPanel/icon-bomb.png")), iconSize, iconSize, false, false);
@@ -198,20 +192,27 @@ public class GameController implements Initializable {
         statsGc.fillRect(0, 0, statsCanvas.getWidth(), statsCanvas.getHeight());
 
         int hearthDistance = 65;
-        for(int i = 0; i < currentMap.getPlayer().getLives(); i++){
-            statsGc.drawImage(heartRedIcon, 970 + (i*hearthDistance), 25);
+        for (int i = 0; i < currentMap.getPlayer().getLives(); i++) {
+            statsGc.drawImage(heartRedIcon, 970 + (i * hearthDistance), 25);
         }
 
         statsGc.drawImage(bombIcon, 810, 25);
         statsGc.setFill(Color.BLACK);
         statsGc.setFont(Font.font("Arial", FontWeight.EXTRA_BOLD, 50));
-        statsGc.fillText(""+currentMap.getPlayer().getBombs().size(), 860, 75);
+        statsGc.fillText("" + currentMap.getPlayer().getBombs().size(), 860, 75);
 
         statsGc.drawImage(enemyIcon, 650, 25);
         statsGc.setFill(Color.BLACK);
         statsGc.setFont(Font.font("Arial", FontWeight.EXTRA_BOLD, 50));
-        statsGc.fillText(""+currentMap.getEnemies().size(), 700,75);
 
-}
+        statsGc.fillText("" + currentMap.getEnemies().size(), 700, 75);
+
+        Label stageLabel = new Label("Stage " + (currentMapIndex + 1));
+        stageLabel.setFont(Font.loadFont(getClass().getResourceAsStream("/fonts/game_font.ttf"), 60));
+        stageLabel.setTextFill(Color.BLACK);
+        stageLabel.setLayoutX(75);
+        stageLabel.setLayoutY(-5);
+        root.getChildren().add(stageLabel);
+    }
 
 }
