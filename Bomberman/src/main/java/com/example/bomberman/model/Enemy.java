@@ -170,7 +170,6 @@ public class Enemy extends Character implements Runnable{
     public void die() {
         isDead = true;
         thread.interrupt();
-        //logic for images
     }
 
     @Override
@@ -222,7 +221,7 @@ public class Enemy extends Character implements Runnable{
             }else if(path.isEmpty()){
                 path = map.getMap().bfs(position);
             }
-
+            move();
             try {
                 Thread.sleep(1000);
             } catch (InterruptedException e) {
