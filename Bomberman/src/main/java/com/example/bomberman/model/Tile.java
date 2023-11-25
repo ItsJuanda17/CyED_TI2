@@ -50,10 +50,6 @@ public class Tile extends GameEntity{
             gc.setFill(Color.GREEN);
             gc.fillRect(position.getPosX() * TILE_WIDTH, position.getPosY() * TILE_HEIGHT, TILE_WIDTH, TILE_HEIGHT);
         }
-        /*
-        gc.setFill(state == TileState.PASSAGE ? Color.GREEN : state == TileState.BREAKABLE_WALL ? Color.GRAY : Color.BLACK);
-        gc.fillRect(position.getPosX() * TILE_WIDTH, position.getPosY() * TILE_HEIGHT, TILE_WIDTH, TILE_HEIGHT);
-         */
     }
 
     @Override
@@ -72,7 +68,7 @@ public class Tile extends GameEntity{
                 "position=" + position +
                 ", content=" + content +
                 ", state=" + state +
-          '}';
+             '}';
     }
 
 }
