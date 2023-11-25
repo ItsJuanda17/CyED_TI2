@@ -9,22 +9,19 @@ import java.util.TimerTask;
 
 public class Explosion extends GameEntity {
 
-    private static final int EXPLOSION_DURATION = 500;
-    private static final int NUM_FRAMES = 6;
-
+    public static final int EXPLOSION_DURATION = 500;
+    private static final int NUM_FRAMES = 3;
     private Timer explosionTimer;
     private int currentFrame;
-
     private Image[] images;
-
     private boolean exploded;
-
     private Map map;
 
-    public Explosion(Canvas canvas, Vector position) {
+    public Explosion(Canvas canvas, Vector position, Map map) {
         super(canvas);
         initializeExplosion(position);
         this.exploded = false;
+        this.map = map;
     }
 
     private void initializeExplosion(Vector position) {
@@ -40,7 +37,6 @@ public class Explosion extends GameEntity {
     }
 
     public void startExplosion() {
-        setPosition(position);
         startExplosionTimer();
         startAnimationTimer();
     }
@@ -59,6 +55,7 @@ public class Explosion extends GameEntity {
         exploded = true;
         explosionTimer.cancel();
         explosionTimer.purge();
+        map.getTile(position).setContent(null);
     }
 
     private void startAnimationTimer() {
@@ -73,8 +70,8 @@ public class Explosion extends GameEntity {
 
     private void animate() {
         if (!exploded) {
-            currentFrame = (currentFrame + 1) % NUM_FRAMES;
             paint();
+            currentFrame = (currentFrame + 1) % NUM_FRAMES;
         }
 
         if (exploded && currentFrame == NUM_FRAMES - 1) {
@@ -92,9 +89,8 @@ public class Explosion extends GameEntity {
     @Override
     public void paint() {
         updateHitBox();
-        paintHitBox();
+
         gc.drawImage(images[currentFrame], position.getPosX() * Tile.TILE_WIDTH, position.getPosY() * Tile.TILE_HEIGHT);
-        }
+    }
 
 }
-

@@ -4,20 +4,25 @@ import com.example.bomberman.collections.Vertex;
 import javafx.scene.canvas.Canvas;
 import javafx.scene.image.Image;
 
-import java.util.Comparator;
-import java.util.Objects;
-import java.util.Queue;
-import java.util.Random;
+import java.util.*;
 
 public class Enemy extends Character implements Runnable{
 
     private final static int RANGE_OF_SIGHT = 3;
-    Queue<Vertex<Vector, Tile>> path;
+    private boolean isChasingPlayer;
+    private Queue<Vertex<Vector, Tile>> path;
+    private Vector targetPosition;
+    private Thread thread;
 
     public Enemy(Canvas canvas, Map map, Vector startPosition) {
         super(canvas, map);
         this.position = startPosition;
         initEnemy();
+    }
+
+    public void start(){
+        thread = new Thread(this);
+        thread.start();
     }
 
     private void initEnemy() {
@@ -27,7 +32,10 @@ public class Enemy extends Character implements Runnable{
         this.lives = 1;
         this.state = CharacterState.IDLE;
         this.frame = 0;
-        this.path = map.getMap().bfs(position);
+        this.path = new LinkedList<>();
+        this.isChasingPlayer = false;
+        this.targetPosition = position;
+        start();
 
         this.idle.add(new Image(Objects.requireNonNull(getClass().getResourceAsStream("/images/enemy/idle/enemy-idle-00.png")), WIDTH, HEIGHT, false, false));
 
@@ -49,138 +57,106 @@ public class Enemy extends Character implements Runnable{
     }
 
     @Override
-    public void move(){
-        Vertex<Vector, Tile> nextVertex = path.poll();
+    public void move() {
+        if (position.equals(targetPosition)) {
+            Vertex<Vector, Tile> nextVertex = path.poll();
+            if (nextVertex == null) return;
+            this.targetPosition = nextVertex.getKey();
+        }
 
-        if(nextVertex == null) return;
-        Vector nextPosition = nextVertex.getKey();
-        moveTowards(nextPosition);
-
-        Queue<Vertex<Vector, Tile>> newPath = map.getMap().bfs(map.getPlayer().getPosition());
-        for(Vertex<Vector, Tile> vertex : newPath){
-            if(vertex.getDistance() < RANGE_OF_SIGHT){
-                path = newPath;
-                nextPosition = path.poll().getKey();
-                moveTowardsPlayer(nextPosition);
-                break;
+        if (isChasingPlayer) {
+            moveTowardsPlayer(targetPosition);
+            double distanceToPlayer = position.distanceTo(map.getPlayer().getPosition());
+            if (distanceToPlayer > RANGE_OF_SIGHT) {
+                isChasingPlayer = false;
+                path = map.getMap().bfs(position);
+                if (!path.isEmpty()) {
+                    this.targetPosition = path.poll().getKey();
+                }
+            }
+        } else {
+            moveTowards(targetPosition);
+            double distanceToPlayer = position.distanceTo(map.getPlayer().getPosition());
+            if (distanceToPlayer <= RANGE_OF_SIGHT) {
+                isChasingPlayer = true;
+                path = map.getMap().bfs(map.getPlayer().getPosition());
+                if (!path.isEmpty()) {
+                    this.targetPosition = path.poll().getKey();
+                }
             }
         }
     }
 
     private void moveTowards(Vector targetPosition) {
-        while (!position.equals(targetPosition)) {
-            int newPosX = position.getPosX();
-            int newPosY = position.getPosY();
+        int newPosX = position.getPosX();
+        int newPosY = position.getPosY();
 
-            Random random = new Random();
-            int randomDirection = random.nextInt(4);
+        Random random = new Random();
+        int randomDirection = random.nextInt(4);
 
-            switch (randomDirection) {
-                case 0:
-                    if (targetPosition.getPosX() < position.getPosX()) {
+        switch (randomDirection) {
+            case 0:
+                if (targetPosition.getPosX() < position.getPosX()) {
+                    Vector nextPos = new Vector(position.getPosX() - 1, position.getPosY());
+                    if (isValidMove(nextPos)) {
                         state = CharacterState.RUN_LEFT;
-                        Vector nextPos = new Vector(position.getPosX() - 1, position.getPosY());
-                        if (isValidMove(nextPos)) {
-                            newPosX--;
-                        }
+                        newPosX--;
                     }
-                    break;
-                case 1:
-                    if (targetPosition.getPosX() > position.getPosX()) {
+                }
+                break;
+            case 1:
+                if (targetPosition.getPosX() > position.getPosX()) {
+                    Vector nextPos = new Vector(position.getPosX() + 1, position.getPosY());
+                    if (isValidMove(nextPos)) {
                         state = CharacterState.RUN_RIGHT;
-                        Vector nextPos = new Vector(position.getPosX() + 1, position.getPosY());
-                        if (isValidMove(nextPos)) {
-                            newPosX++;
-                        }
+                        newPosX++;
                     }
-                    break;
-                case 2:
-                    if (targetPosition.getPosY() < position.getPosY()) {
+                }
+                break;
+            case 2:
+                if (targetPosition.getPosY() < position.getPosY()) {
+                    Vector nextPos = new Vector(position.getPosX(), position.getPosY() - 1);
+                    if (isValidMove(nextPos)) {
                         state = CharacterState.RUN_UP;
-                        Vector nextPos = new Vector(position.getPosX(), position.getPosY() - 1);
-                        if (isValidMove(nextPos)) {
-                            newPosY--;
-                        }
+                        newPosY--;
                     }
-                    break;
-                case 3:
-                    if (targetPosition.getPosY() > position.getPosY()) {
+                }
+                break;
+            case 3:
+                if (targetPosition.getPosY() > position.getPosY()) {
+                    Vector nextPos = new Vector(position.getPosX(), position.getPosY() + 1);
+                    if (isValidMove(nextPos)) {
                         state = CharacterState.RUN_DOWN;
-                        Vector nextPos = new Vector(position.getPosX(), position.getPosY() + 1);
-                        if (isValidMove(nextPos)) {
-                            newPosY++;
-                        }
+                        newPosY++;
                     }
-                    break;
-            }
-
-            position.setPosX(newPosX);
-            position.setPosY(newPosY);
-
-            try {
-                Thread.sleep(50000);
-            } catch (InterruptedException e) {
-                e.printStackTrace();
-            }
+                }
+                break;
         }
 
-        try {
-            Thread.sleep(50000);
-        } catch (InterruptedException e) {
-            e.printStackTrace();
-        }
+        position.setPosX(newPosX);
+        position.setPosY(newPosY);
     }
 
     private void moveTowardsPlayer(Vector targetPosition){
-        while(!position.equals(targetPosition)){
-            int newPosX = position.getPosX();
-            int newPosY = position.getPosY();
+        int newPosX = position.getPosX();
+        int newPosY = position.getPosY();
 
-            if(targetPosition.getPosX() < position.getPosX()){
-                state = CharacterState.RUN_LEFT;
-                Vector nextPos = new Vector(position.getPosX() - 1, position.getPosY());
-                if(isValidMove(nextPos)){
-                    newPosX--;
-                }
-            }
-
-            if(targetPosition.getPosX() > position.getPosX()){
-                state = CharacterState.RUN_RIGHT;
-                Vector nextPos = new Vector(position.getPosX() + 1, position.getPosY());
-                if(isValidMove(nextPos)){
-                    newPosX++;
-                }
-            }
-            if(targetPosition.getPosY() < position.getPosY()){
-                state = CharacterState.RUN_UP;
-                Vector nextPos = new Vector(position.getPosX(), position.getPosY() - 1);
-                if(isValidMove(nextPos)){
-                    newPosY--;
-                }
-            }
-            if(targetPosition.getPosY() > position.getPosY()){
-                state = CharacterState.RUN_DOWN;
-                Vector nextPos = new Vector(position.getPosX(), position.getPosY() + 1);
-                if(isValidMove(nextPos)){
-                    newPosY++;
-                }
-            }
-
-            position.setPosX(newPosX);
-            position.setPosY(newPosY);
-
-            try {
-                Thread.sleep(50000);
-            } catch (InterruptedException e) {
-                e.printStackTrace();
-            }
+        if(targetPosition.getPosX() < position.getPosX() && isValidMove(new Vector(position.getPosX() - 1, position.getPosY()))){
+            state = CharacterState.RUN_LEFT;
+            newPosX--;
+        }else if(targetPosition.getPosX() > position.getPosX() && isValidMove(new Vector(position.getPosX() + 1, position.getPosY()))){
+            state = CharacterState.RUN_RIGHT;
+            newPosX++;
+        }else if(targetPosition.getPosY() < position.getPosY() && isValidMove(new Vector(position.getPosX(), position.getPosY() - 1))){
+            state = CharacterState.RUN_UP;
+            newPosY--;
+        }else if(targetPosition.getPosY() > position.getPosY() && isValidMove(new Vector(position.getPosX(), position.getPosY() + 1))){
+            state = CharacterState.RUN_DOWN;
+            newPosY++;
         }
 
-        try {
-            Thread.sleep(50000);
-        } catch (InterruptedException e) {
-            e.printStackTrace();
-        }
+        position.setPosX(newPosX);
+        position.setPosY(newPosY);
 
     }
 
@@ -192,15 +168,22 @@ public class Enemy extends Character implements Runnable{
 
     @Override
     public void die() {
-
+        isDead = true;
+        thread.interrupt();
+        //logic for images
     }
 
     @Override
     public void onCollision(GameEntity other) {
         if(other instanceof Player){
             other.onCollision(this);
-        }else if (other instanceof Explosion){
+        }else if (other instanceof Bomb){
             other.onCollision(this);
+        }else if (other instanceof Explosion){
+            lives--;
+            if(lives == 0){
+                die();
+            }
         }
     }
 
@@ -234,15 +217,18 @@ public class Enemy extends Character implements Runnable{
     @Override
     public void run() {
         while(!isDead){
-            if(path.isEmpty()) path = map.getMap().bfs(position);
-            move();
+            if(isChasingPlayer) {
+                path = map.getMap().bfs(map.getPlayer().getPosition());
+            }else if(path.isEmpty()){
+                path = map.getMap().bfs(position);
+            }
 
             try {
                 Thread.sleep(1000);
             } catch (InterruptedException e) {
-                e.printStackTrace();
+                Thread.currentThread().interrupt();
+                break;
             }
-  }
-}
-
+        }
+    }
 }

@@ -20,6 +20,12 @@ public class Vector implements Comparable<Vector>{
         }
     }
 
+    public double distanceTo(Vector other) {
+        int dx = other.getPosX() - this.getPosX();
+        int dy = other.getPosY() - this.getPosY();
+        return Math.sqrt(dx * dx + dy * dy);
+    }
+
     public void setSpeed(int speed){
         posX *= speed;
         posY *= speed;
@@ -68,6 +74,6 @@ public class Vector implements Comparable<Vector>{
             return -1;
         }else{
             return 1;
-        }
+       }
     }
 }

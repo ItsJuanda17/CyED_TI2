@@ -7,14 +7,10 @@ import com.example.bomberman.control.GameController;
 import javafx.scene.canvas.Canvas;
 import javafx.scene.canvas.GraphicsContext;
 import javafx.scene.image.Image;
-import javafx.scene.input.KeyCode;
 import javafx.scene.input.KeyEvent;
 import javafx.scene.paint.Color;
 
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.Objects;
-import java.util.Random;
+import java.util.*;
 
 public class Map {
 
@@ -29,11 +25,6 @@ public class Map {
     private IGraph<Vector, Tile> map;
     private Tile[][] grid;
     private Player player;
-    private Bomb bomb;
-
-
-
-    private Explosion explosion;
     private ArrayList<Enemy> enemies;
 
     public Map(Canvas canvas) {
@@ -55,11 +46,30 @@ public class Map {
 
         this.spawnPoint = map.getVertex(getRandomPosition()).getValue();
         this.exitPoint = map.getVertex(getRandomPosition()).getValue();
-        this.explosion = new Explosion(canvas, new Vector(-1, -1));
         this.player = new Player(canvas, this);
-        this.bomb = new Bomb(canvas, this, player.getPosition().getPosX(), player.getPosition().getPosY());
 
         this.exitImage = new Image(Objects.requireNonNull(getClass().getResourceAsStream("/images/walls/exit-00.png")), Tile.TILE_WIDTH, Tile.TILE_HEIGHT, false, false);
+    }
+
+    public void setTileAsPassage(int posX, int posY) {
+        Vector position = new Vector(posX, posY);
+        Tile tile = map.getVertex(position).getValue();
+        tile.setState(TileState.PASSAGE);
+        tile.setContent(null);
+        int x = position.getPosX();
+        int y = position.getPosY();
+        if (x > 0 && grid[x - 1][y].getState() == TileState.PASSAGE) {
+            map.addEdge(position, new Vector(x - 1, y), 1);
+        }
+        if (x < WIDTH - 1 && grid[x + 1][y].getState() == TileState.PASSAGE) {
+            map.addEdge(position, new Vector(x + 1, y), 1);
+        }
+        if (y > 0 && grid[x][y - 1].getState() == TileState.PASSAGE) {
+            map.addEdge(position, new Vector(x, y - 1), 1);
+        }
+        if (y < HEIGHT - 1 && grid[x][y + 1].getState() == TileState.PASSAGE) {
+            map.addEdge(position, new Vector(x, y + 1), 1);
+        }
     }
 
     public Vector getRandomPosition() {
@@ -121,54 +131,17 @@ public class Map {
         }
     }
 
-    public Tile getVertex(Vector position) {
-        return grid[position.getPosX()][position.getPosY()];
-    }
-
-
-    public boolean collidesWithWalls(Player player) {
-
-        int playerX = player.getPosition().getPosX();
-        int playerY = player.getPosition().getPosY();
-        int playerSize = 10;
-
-
-        for (Tile tile : map.getVertices()) {
-            if (tile.getState() == TileState.BLOCKED) {
-                int wallX = tile.getX() * 10;
-                int wallY = tile.getY() * 10;
-
-                if (playerX < wallX + 10 &&
-                        playerX + playerSize > wallX &&
-                        playerY < wallY + 10 &&
-                        playerY + playerSize > wallY) {
-                    return true;
-                }
-            }
-        }
-
-        return false;
-    }
-
     public Tile getSpawnPoint() {
         return spawnPoint;
     }
 
-    public void paint(){
+    public void paint() {
         paintMap();
         player.paint();
 
-        for(Enemy enemy : enemies){
+        for (Enemy enemy : enemies) {
             enemy.paint();
-            Thread thread = new Thread(enemy);
-            thread.start();
         }
-
-        for (Explosion explosion : bomb.getExplosions()) {
-            explosion.paint();
-        }
-
-
 
         checkCollisions();
     }
@@ -185,8 +158,6 @@ public class Map {
         exitPoint.getGc().drawImage(exitImage, exitPoint.getX() * Tile.TILE_WIDTH, exitPoint.getY() * Tile.TILE_HEIGHT);
     }
 
-
-
     public void setOnKeyPressed(KeyEvent event){
         player.setOnKeyPressed(event);
     }
@@ -196,39 +167,38 @@ public class Map {
     }
 
     public void checkCollisions() {
-        for (Enemy enemy : enemies) {
-            if (enemy.intersect(player)) {
-                enemy.onCollision(player);
-            }
-        }
-
         Tile playerActualTile = map.getVertex(player.getPosition()).getValue();
-        if (playerActualTile != null && player.intersect(playerActualTile)) {
+        if (player.intersect(playerActualTile)) {
             playerActualTile.onCollision(player);
         }
 
-        for (Explosion explosion : bomb.getExplosions()) {
+        Iterator<Enemy> enemyIterator = enemies.iterator();
+        while (enemyIterator.hasNext()) {
+            Enemy enemy = enemyIterator.next();
+            Tile enemyActualTile = map.getVertex(enemy.getPosition()).getValue();
 
-            for (Enemy enemy : enemies) {
-                if (enemy.intersect(explosion)) {
-                    enemy.onCollision(explosion);
-                }
+            if (enemy.intersect(player)) {
+                enemy.onCollision(player);
             }
 
-            if (player.intersect(explosion)) {
-                player.onCollision(explosion);
+            if (enemy.intersect(enemyActualTile)) {
+                enemyActualTile.onCollision(enemy);
             }
 
-            Tile explosionTile = map.getVertex(explosion.getPosition()).getValue();
-            if (explosionTile != null && explosion.intersect(explosionTile)) {
-                explosionTile.onCollision(explosion);
+            if (enemy.isDead()) {
+                enemyIterator.remove();
             }
         }
+
     }
-    public boolean isNextTileBlocked(int x, int y){
+
+
+    public boolean isNextTileBlocked(int x, int y) {
         Tile tile = map.getVertex(new Vector(x, y)).getValue();
         return tile.getState() != TileState.PASSAGE || tile.getContent() instanceof Bomb;
-}
+    }
 
-
+    public Tile getTile(Vector position) {
+        return map.getVertex(position).getValue();
+    }
 }

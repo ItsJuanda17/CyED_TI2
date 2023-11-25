@@ -2,6 +2,7 @@ package com.example.bomberman.control;
 
 import com.example.bomberman.HelloApplication;
 import com.example.bomberman.model.Map;
+import javafx.animation.PauseTransition;
 import javafx.application.Platform;
 import javafx.fxml.FXML;
 import javafx.fxml.FXMLLoader;
@@ -16,6 +17,7 @@ import javafx.scene.paint.Color;
 import javafx.scene.text.Font;
 import javafx.scene.text.FontWeight;
 import javafx.stage.Stage;
+import javafx.util.Duration;
 
 import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
@@ -69,7 +71,7 @@ public class GameController implements Initializable {
             InputStream inputStream = getClass().getResourceAsStream(soundPath);
 
             if (inputStream != null) {
-                // Almacenar el contenido en un búfer
+
                 ByteArrayOutputStream buffer = new ByteArrayOutputStream();
                 int nRead;
                 byte[] data = new byte[1024];
@@ -89,6 +91,7 @@ public class GameController implements Initializable {
 
                 bombClip = AudioSystem.getClip();
                 bombClip.open(audioInputStream);
+                bombClip.loop(Clip.LOOP_CONTINUOUSLY);
                 bombClip.start();
             } else {
                 System.err.println("No se pudo encontrar el recurso: " + soundPath);
@@ -121,11 +124,16 @@ public class GameController implements Initializable {
         }
 
         if(currentMap.getEnemies().isEmpty() && currentMap.getPlayer().getPosition().equals(currentMap.getExitPoint().getPosition())){
-            loadNextMap();
+            PauseTransition pause = new PauseTransition(Duration.seconds(5));
+            pause.setOnFinished(event -> loadNextMap());
+            pause.play();
         }
 
-        paint();
+        if(isGameRunning) {
+            paint();
+        }
     }
+
 
 
     public void initMaps(){

@@ -17,6 +17,7 @@ public class Tile extends GameEntity{
         this.position = new Vector(x, y);
         this.canvas = canvas;
         this.gc = canvas.getGraphicsContext2D();
+        updateHitBox();
     }
 
     public GameEntity getContent() {
@@ -38,7 +39,7 @@ public class Tile extends GameEntity{
 
     @Override
     public void onCollision(GameEntity other) {
-        content.onCollision(other);
+        if(content != null) content.onCollision(other);
     }
 
     @Override
@@ -71,7 +72,7 @@ public class Tile extends GameEntity{
                 "position=" + position +
                 ", content=" + content +
                 ", state=" + state +
-             '}';
+          '}';
     }
 
 }

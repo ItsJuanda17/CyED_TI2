@@ -24,10 +24,6 @@ public class Wall extends GameEntity{
         return destroyed;
     }
 
-    public void destroy() {
-        this.destroyed = true;
-    }
-
     @Override
     public void onCollision(GameEntity other) {
         if(other instanceof Player) {
