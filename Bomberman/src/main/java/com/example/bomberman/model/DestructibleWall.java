@@ -45,6 +45,6 @@ public class DestructibleWall extends Wall {
     public void animateExplosion() {
         gc.drawImage(explosion.get(currentFrame % explosion.size()), position.getPosX()*Tile.TILE_WIDTH, position.getPosY()*Tile.TILE_HEIGHT);
         currentFrame++;
-}
+    }
 
 }
