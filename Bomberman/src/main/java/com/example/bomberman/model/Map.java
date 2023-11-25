@@ -16,6 +16,7 @@ public class Map {
 
     public final static int WIDTH = (int) (GameController.GAME_WIDTH / Tile.TILE_WIDTH);
     public final static int HEIGHT = (int) (GameController.GAME_HEIGHT / Tile.TILE_HEIGHT);
+    private static final int SPAWN_AREA_SIZE = 2;
     private Canvas canvas;
     private GraphicsContext gc;
     private Tile spawnPoint;
@@ -33,22 +34,60 @@ public class Map {
         this.map = new ListGraph<>();
         this.randomMapGenerator = new RandomMapGenerator(canvas, WIDTH, HEIGHT);
         createMap();
-
-        this.enemies = new ArrayList<>();
-        Random random = new Random();
-
-        int enemyCount = 1;
-        //int enemyCount = random.nextInt(3) + 5;
-        for(int i = 0; i < enemyCount; i++){
-            Enemy enemy = new Enemy(canvas, this, getRandomPosition());
-            enemies.add(enemy);
-        }
-
-        this.spawnPoint = map.getVertex(getRandomPosition()).getValue();
-        this.exitPoint = map.getVertex(getRandomPosition()).getValue();
+        initializeSpawnArea();
         this.player = new Player(canvas, this);
-
+        generateEnemies();
+        generateRandomPowerUps(5);
+        this.exitPoint = map.getVertex(getRandomPosition()).getValue();
         this.exitImage = new Image(Objects.requireNonNull(getClass().getResourceAsStream("/images/walls/exit-00.png")), Tile.TILE_WIDTH, Tile.TILE_HEIGHT, false, false);
+    }
+
+    private void initializeSpawnArea() {
+        this.spawnPoint = map.getVertex(getRandomPosition()).getValue();
+        int x = spawnPoint.getX();
+        int y = spawnPoint.getY();
+
+        // Set the spawn area as passages and surround it with breakable walls
+        for (int i = x - SPAWN_AREA_SIZE; i <= x + SPAWN_AREA_SIZE; i++) {
+            for (int j = y - SPAWN_AREA_SIZE; j <= y + SPAWN_AREA_SIZE; j++) {
+                if (isWithinBounds(i, j) && !isOnMapEdge(i, j)) {
+                    if (i == x - SPAWN_AREA_SIZE || i == x + SPAWN_AREA_SIZE || j == y - SPAWN_AREA_SIZE || j == y + SPAWN_AREA_SIZE) {
+                        setTileAsBreakableWall(i, j);
+                    } else {
+                        setTileAsPassage(i, j);
+                    }
+                }
+            }
+        }
+    }
+
+    private boolean isOnMapEdge(int x, int y) {
+        return x == 0 || x == WIDTH - 1 || y == 0 || y == HEIGHT - 1;
+    }
+
+    private boolean isWithinBounds(int x, int y) {
+        return x >= 0 && x < WIDTH && y >= 0 && y < HEIGHT;
+    }
+
+
+    private void setTileAsBreakableWall(int posX, int posY) {
+        Vector position = new Vector(posX, posY);
+        Tile tile = map.getVertex(position).getValue();
+        tile.setState(TileState.BREAKABLE_WALL);
+        int x = position.getPosX();
+        int y = position.getPosY();
+        if (x > 0 && grid[x - 1][y].getState() == TileState.PASSAGE) {
+            map.removeEdge(position, new Vector(x - 1, y));
+        }
+        if (x < WIDTH - 1 && grid[x + 1][y].getState() == TileState.PASSAGE) {
+            map.removeEdge(position, new Vector(x + 1, y));
+        }
+        if (y > 0 && grid[x][y - 1].getState() == TileState.PASSAGE) {
+            map.removeEdge(position, new Vector(x, y - 1));
+        }
+        if (y < HEIGHT - 1 && grid[x][y + 1].getState() == TileState.PASSAGE) {
+            map.removeEdge(position, new Vector(x, y + 1));
+        }
     }
 
     public void setTileAsPassage(int posX, int posY) {
@@ -72,6 +111,33 @@ public class Map {
         }
     }
 
+    private void generateEnemies() {
+        this.enemies = new ArrayList<>();
+        Random random = new Random();
+
+        int enemyCount = random.nextInt(3) + 3;
+
+        for (int i = 0; i < enemyCount; i++) {
+            Vector enemyPosition;
+            do {
+                enemyPosition = getRandomPosition();
+            } while (isInsideSpawnArea(enemyPosition));
+
+            Enemy enemy = new Enemy(canvas, this, enemyPosition);
+            enemies.add(enemy);
+        }
+    }
+
+    private boolean isInsideSpawnArea(Vector position) {
+        int x = position.getPosX();
+        int y = position.getPosY();
+        int spawnX = spawnPoint.getX();
+        int spawnY = spawnPoint.getY();
+
+        return x >= spawnX - SPAWN_AREA_SIZE && x <= spawnX + SPAWN_AREA_SIZE
+                && y >= spawnY - SPAWN_AREA_SIZE && y <= spawnY + SPAWN_AREA_SIZE;
+    }
+
     public Vector getRandomPosition() {
         Random random = new Random(); int x; int y; Vector position;
         do {
@@ -81,6 +147,15 @@ public class Map {
         } while (map.getVertex(position).getValue().getState() != TileState.PASSAGE);
 
         return position;
+    }
+
+    public void generateRandomPowerUps(int numPowerUps) {
+        Random random = new Random();
+        for (int i = 0; i < numPowerUps; i++) {
+            PowerUp.PowerUpType randomType = PowerUp.PowerUpType.values()[random.nextInt(PowerUp.PowerUpType.values().length)];
+            PowerUp powerUp = new PowerUp(canvas, getRandomPosition(), randomType, this);
+            getTile(powerUp.getPosition()).setContent(powerUp);
+        }
     }
 
     public IGraph<Vector, Tile> getMap() {
@@ -152,9 +227,7 @@ public class Map {
             if(!tile.equals(spawnPoint) && !tile.equals(exitPoint))
                 tile.paint();
         }
-        spawnPoint.getGc().setFill(Color.BLUE);
         spawnPoint.getGc().fillRect(spawnPoint.getX() * Tile.TILE_WIDTH, spawnPoint.getY() * Tile.TILE_HEIGHT, Tile.TILE_WIDTH, Tile.TILE_HEIGHT);
-        exitPoint.getGc().setFill(Color.RED);
         exitPoint.getGc().drawImage(exitImage, exitPoint.getX() * Tile.TILE_WIDTH, exitPoint.getY() * Tile.TILE_HEIGHT);
     }
 
